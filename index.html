@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+
+    
+    <title>calculator</title>
+</head>
+<body>
+    <header>
+        <h1 style="font-family: monospace;text-align: center;border-bottom:5px double black">TRANSMISSION AND DISTRIBUTION SYSTEMS</h1>
+    </header>
+    <div class="input">
+        
+        <div class="content">
+            
+            <ol style="font-size: larger;font-weight: bold;margin-left: 10px;" type="I">
+                <li>
+                    <h3>TYPE OF SYSTEM:
+                        <select name="TYPE OF SYSTEM" class="box">
+                            <option value="Symm">Symmetrical spacing</option>
+                            <option value="UnSymm">UnSymmetrical spacing</option>
+                        </select>
+                    </h3>
+                </li>
+                <li>
+                    <h3>SPACING BETWEEN THE PHASE CONDUCTORS:
+                        <input type="number" name="numInp"> 
+                        <select name="units" class="box">
+                            <option value="m">in m</option>
+                            <option value="mm">in mm</option>
+                            <option value="ft">in ft</option>
+                            <option value="inch">in inch</option>
+                        </select>
+                    </h3>
+                </li>
+                <li>
+                    <h3>NUMBER OF SUBCONDUCTORS PER BUNDLE:<input type="number" name="n_subs"></h3>
+                </li>
+                <li>
+                    <h3>SPACING BETWEEN THE SUBCONDUCTORS:<input type="number" name="numInp"> 
+                        <select name="units" class="box">
+                            <option value="m">in m</option>
+                            <option value="mm">in mm</option>
+                            <option value="ft">in ft</option>
+                            <option value="inch">in inch</option>
+                        </select> 
+                    </h3>
+                </li>
+                <li>
+                    <h3>NUMBER OF STRANDS IN EACH SUBCONDUCTOR: <input type="number"  name="n_strands" ></h3>
+                </li>
+                <li>
+                    <h3>DIAMETER OF EACH STRAND: <input type="number" name="dia_strand">
+                        <select name="units" class="box">
+                            <option value="m">in m</option>
+                            <option value="mm">in mm</option>
+                            <option value="ft">in ft</option>
+                            <option value="inch">in inch</option>
+                        </select>
+                    </h3>
+                </li>
+            
+                <li>
+                    <h3>LENGTH OF THE LINE IN KM : <input type="number" name="len_line"></h3>
+                </li>
+                <li>
+                    <h3>MODEL OF THE LINE:
+                        <select name="model_type" class="box">
+                            <option value="s">Short</option>
+                            <option value="n">Nominal PI</option>
+                            <option value="l">Long</option>
+                        </select>
+                    </h3>
+                </li>
+                <li>
+                    <h3>RESISTANCE OF THE LINE PER KM : <input type="number" name="dia_strand"></h3>
+                </li> 
+                <li>
+                    <h3>POWER FREQUENCY : <input type="number" name="freq"></h3>
+                </li> 
+                <li>
+                    <h3>NOMINAL SYSTEM VOLTAGE : <input type="number" name="sys_voltge"></h3>
+                </li>
+                <li>
+                    <h3>RECEIVING END LOAD IN MW : <input type="number" name="load"></h3>
+                </li>
+                <li>
+                    <h3>POWER FACTOR OF RECEIVING END LOAD: <input type="number" name="load_pf"></h3>
+                </li>
+            </ol>
+        </div>
+        
+        <div class="container">
+            <div id="calculator">
+                <div id="keyboard">
+                    <button class="operator" id="clear">C</button>
+                    <button class="operator" id="backspace"> < </button>
+                    <button class="operator" id="^"> x10^ </button>
+                    
+                    <button class="number" id="7">7</button>
+                    <button class="number" id="8">8</button>
+                    <button class="number" id="9">9</button>
+                    
+                    <button class="number" id="4">4</button>
+                    <button class="number" id="5">5</button>
+                    <button class="number" id="6">6</button>
+                    
+                    <button class="number" id="1">1</button>
+                    <button class="number" id="2">2</button>
+                    <button class="number" id="3">3</button>
+                    <button class="number" id=".">.</button>
+                    <button class="number" id="0">0</button>
+                    <button class="empty" id="empty"></button>
+                </div>
+                <button class="calculate" id="calc">CALCULATE</button>
+            </div>
+        </div>    
+        
+    </div>
+    <div class = "output">
+        <div class = "content2">
+        <ol style="font-size: larger;font-weight: bold;margin-left: 30px;" type="I">
+            <li>
+                <h3>INDUCTANCE PER PHASE PER KM IN H/Km =
+                    <input type="number" name="L">
+                </h3>
+            </li>
+            <li>
+                <h3>CAPACITANCE PER PHASE PER KM IN F/Km =
+                    <input type="number" name="C"> 
+                    
+                </h3>
+            </li>
+            <li>
+                <h3>INDUCTIVE REACTANCE OF LINE IN OHM =<input type="number"  name="xl"></h3>
+            </li>
+            <li>
+                <h3>CAPACITIVE REACTANCE OF LINE IN OHM =<input type="number"  name="xc"></h3>
+            </li>
+            <li>
+                <h3>CHARGING CURRENT DRAWN FROM SENDING SUBSTATION = <input type="number"  name="icharge_s" ></h3>
+            </li>
+            <li>
+                <h3>ABCD PARAMETERS OF THE LINE:
+                   <ol type="i">
+                       <li><h3>A = <input type="number" name="A"></h3></li>
+                       <li><h3>B = <input type="number" name="B"></h3></li>
+                       <li><h3>C = <input type="number" name="C"></h3></li>
+                       <li><h3>D = <input type="number" name="D"></h3></li>
+                   </ol> 
+                    
+                </h3>
+            </li>
+        
+            <li>
+                <h3>SENDING END VOLTAGE IN kV(NOMINAL PI) = <input type="number" name="vnomi_s"></h3>
+            </li>
+            <li>
+                <h3>SENDING END CURRENT IN A =
+                    <input type="number" name="i_s">
+                </h3>
+            </li>
+            <li>
+                <h3>% VOLTAGE REGULATION = <input type="number" name="dia_strand"></h3>
+            </li> 
+            <li>
+                <h3>POWER LOSS IN THE LINE IN MW = <input type="number" name="loss"></h3>
+            </li> 
+            <li>
+                <h3>% TRANSMISSION EFFICIENCY = <input type="number" name="trns_eff"></h3>
+            </li>
+            
+        </ol>
+        </div>
+    </div>
+            
+</body>
+</html>
