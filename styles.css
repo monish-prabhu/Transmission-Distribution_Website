@@ -25,11 +25,15 @@ body{
 .input,.output{
 	background-color: rgba(255, 255, 255, 0.808);
     width: 75%;
+	font-family: monospace;
 	
     border:5px double ;
 	margin: auto;
-	font-family: monospace;
+	
+	
 }
+
+
 .input{
 	height: 80vh;
 
@@ -58,7 +62,7 @@ body{
 	width: 240px;
 	height: 480px;
 	background-color: #eaedef;
-	margin-top: 140px;
+	margin-top: 120px;
 	top: 100px;
 	position: fixed;
 	right: 350px;
@@ -118,7 +122,7 @@ body{
 	box-shadow: 0 5px #666;
 	transform: translateY(4px);
   }
-  input{
+input{
 	  margin-left: 20px;
 	  background-color : rgba(163, 162, 162, 0.37);
 	  border: 4px double black;
