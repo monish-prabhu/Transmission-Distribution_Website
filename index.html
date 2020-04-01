@@ -1,9 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- hitwebcounter Code START -->
+    <a href="https://www.hitwebcounter.com" target="_blank">
+    <img src="https://hitwebcounter.com/counter/counter.php?page=7219558&style=0007&nbdigits=2&type=page&initCount=0" title="User Stats" Alt="PHP Hits Count"   border="0" >
+    </a>      
     <link rel="stylesheet" href="styles.css">
     <meta charset="UTF-8">
-    <script>
+    <script type="text/javascript">
+        function insert(num){
+            
+            document.form.getElementsById("load").values = num;
+                  
+        }
         function submit()
         {
             alert("jbjn!")
@@ -103,11 +112,12 @@
         <div class="container">
             <div id="calculator">
                 <div id="keyboard">
+                <form name="calci">    
                     <button class="operator" id="clear">C</button>
                     <button class="operator" id="backspace"> < </button>
                     <button class="operator" id="^"> x10^ </button>
-                    <button class="number" id="7">7</button>
-                    <button class="number" id="8">8</button>
+                    <button class="number" id="7" onclick="insert(7)">7</button>
+                    <button class="number" id="8" onclick="insert(8)">8</button>
                     <button class="number" id="9">9</button>
                     <button class="number" id="4">4</button>
                     <button class="number" id="5">5</button>
@@ -118,6 +128,7 @@
                     <button class="operator" id=".">.</button>
                     <button class="number" id="0">0</button>
                     <button class="operator id="-">-</button>
+                </form>    
                 </div>
                 <button class="calculate" id="calc" onclick= 'submit()'>CALCULATE</button>
             </div>
