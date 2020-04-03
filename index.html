@@ -7,19 +7,9 @@
     </a>       
     <link rel="stylesheet" href="styles.css">
     <meta charset="UTF-8">
-    <script type="text/javascript">
-        function insert(num){
-            
-            document.form.getElementsById("load").values = num;
-                  
-        }
-        function submit()
-        {
-            alert("jbjn!")
-        }
-    </script>
+    <script type="text/javascript" src="main.js"></script>
     
-    <title>calculator</title>
+    <title>Calculator</title>
 
 
 </head>
@@ -33,13 +23,13 @@
         <div class="content">
             
             <ol style="font-size: larger;font-weight: bold;margin-left: 10px;" type="I">
+                  
                 <li>
-                    <h3>TYPE OF SYSTEM:
-                        <select name="TYPE OF SYSTEM" class="box">
-                            <option value="Symm">Symmetrical spacing</option>
-                            <option value="UnSymm">UnSymmetrical spacing</option>
-                        </select>
-                    </h3>
+                    <h3>TYPE OF SYSTEM:</h3>
+                    <select name="TYPE OF SYSTEM" class="box">
+                        <option value="Symm">Symmetrical spacing</option>
+                        <option value="UnSymm">UnSymmetrical spacing</option>
+                    </select>
                 </li>
                 <li>
                     <h3>SPACING BETWEEN THE PHASE CONDUCTORS:
@@ -127,7 +117,7 @@
                     <button class="number" id="3">3</button>
                     <button class="operator" id=".">.</button>
                     <button class="number" id="0">0</button>
-                    <button class="operator id="-">-</button>
+                    <button class="operator" id="-">-</button>
                 </form>    
                 </div>
                 <button class="calculate" id="calc" onclick= 'submit()'>CALCULATE</button>
@@ -138,6 +128,7 @@
     <div class = "output">
         <div class = "content2">
         <ol style="font-size: larger;font-weight: bold;margin-left: 30px;" type="I">
+           
             <li>
                 <h3>INDUCTANCE PER PHASE PER KM IN H/Km =
                     <input type="number" name="L">
