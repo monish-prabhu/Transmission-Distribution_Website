@@ -139,7 +139,7 @@ function convertToEngMode(num, unit, defaultPrefix) {
     let nearest = Math.floor(l/3) * 3;
     let val = Number.parseFloat(num / Math.pow(10, nearest - defaultPrefix)).toFixed(3).toString();
     // console.log(`val=${val}, unit=${unit}`);
-    return val + unitPrefix[nearest] + unit;
+    return `${val} ${unitPrefix[nearest]}${unit}`;
 }
 
 function getDownloadText() {
