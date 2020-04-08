@@ -104,16 +104,15 @@ function submit(){
 
 function setQuestionValues() {
     for (let i = 0; i < questions.length; ++i) {
-        // console.log(questions[i]);
         if (questions[i].hasOptions()) {
             let select = document.getElementById(`select-value-${i+1}`);
             questions[i].setResponseOption(select.selectedIndex);        
         } else {
-            let val = document.getElementById(`input-value-${i+1}`).value;
+            let val = Number(document.getElementById(`input-value-${i+1}`).value);
             let unitElement = document.getElementById(`select-units-${i+1}`);
             if (unitElement && unitElement.options.length > 1) {             
                 val = convertToSiUnits(val, unitElement.selectedIndex);
-            }
+            }  
             questions[i].setResponse(val);
         } 
         // console.log(questions[i]);
@@ -135,6 +134,7 @@ function convertToSiUnits(num, unit) {
 }
 
 function convertToEngMode(num, unit, defaultPrefix) {
+    if (num == 0) return 0 + unitPrefix[defaultPrefix] + unit;
     let l = Math.floor(Math.log10(num) + defaultPrefix);
     let nearest = Math.floor(l/3) * 3;
     let val = Number.parseFloat(num / Math.pow(10, nearest - defaultPrefix)).toFixed(3).toString();
