@@ -12,6 +12,28 @@ const unitPrefix = {
     '9': 'G'
 }
 const MIME_TYPE = 'text/plain';
+var canvas, resistorImg, inductorImg, backgroundImg, img;
+
+function setup() {
+    let canvasContainer = document.getElementById('canvas-container');
+    resistorImg = loadImage('https://eswaraprasadp.github.io/resources/resistor.png');
+    inductorImg = loadImage('https://eswaraprasadp.github.io/resources/inductor.png');
+    canvas = createCanvas(500, 500);
+    canvas.parent('canvas-container');
+}
+
+function draw() {
+    line(40,100,80,100);
+    image(resistorImg, 80, 87.5, 100, 25, 0, 0);
+    line(180,100,220,100);
+    image(inductorImg, 250, 83, 100, 25, 0, 0);
+    line(220,100,260,100);
+}
+
+function arrow(x, y, w, h) {
+    triangle(x-w/2,y+h/2,x,y-h/2,x+w/2,y+h/2);
+    fill(0);
+  }
 
 class Question {
     constructor(question, unit, defaultPrefix, responseOptions, response) {
