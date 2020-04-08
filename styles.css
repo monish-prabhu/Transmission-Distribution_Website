@@ -1,5 +1,5 @@
 body{
-    background-image: url("https://images.unsplash.com/photo-1413882353314-73389f63b6fd?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb");
+    background-image: url("background.jpeg");
     background-size: cover;
     background-attachment: fixed;    
 }
@@ -13,11 +13,13 @@ body{
 	
 	width: 65%;
 	
-	margin: 25px;
+	margin: auto;
+	padding-bottom: 20px;
 }
 .content2{
 	width: 65%;
 	margin: auto;
+	padding-bottom: 20px;
 
 }
 .input,.output{
@@ -50,16 +52,22 @@ body{
 	outline: none;
 	border-radius:10px ;
 }
+.center{
+	text-align: center;
+	width: 100%;
+	margin: auto;
+	padding: 15px 0px;
+}
 
 .container{
 	position: relative;	
 }
 #calculator{
 	width: 240px;
-	height: 480px;
+	height: auto;
 	background-color: #eaedef;
-	margin-top: 120px;
-	top: 100px;
+	margin-top: 20px;
+	bottom: 10px;
 	position: fixed;
 	right: 30px;
 	
@@ -98,7 +106,6 @@ body{
 
 .calculate {
 	position: relative;
-	left: 30px;
 	padding: 5px 20px;
 	font-size: 24px;
 	text-align: center;
@@ -108,7 +115,7 @@ body{
 	background-color: rgb(4, 3, 8);
 	border: 2px double black;
 	border-radius: 15px;
-	box-shadow: 0 5px #999;
+	box-shadow: 0 3px #999;
   }
   
   .calculate:hover {background-color: #181717}
