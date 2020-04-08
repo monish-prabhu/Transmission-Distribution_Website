@@ -36,29 +36,17 @@ function arrow(x, y, w, h) {
   }
 
 class Question {
-    constructor(question, unit, defaultPrefix, responseOptions, response) {
-        if (arguments.length == 3) {
-            this._question = question;
-            this._defaultPrefix = defaultPrefix;
-            this._unit = unit;
-        } else if (arguments.length == 4) {
-            this._question = question;
-            this._unit = unit;
-            this._defaultPrefix = defaultPrefix;
-            this._options = responseOptions;
-            if (responseOptions.length > 1) {
-                this._response = responseOptions[0];
-            }
-        } else {
-            this._question = question;
-            this._unit = unit;
-            this._defaultPrefix = defaultPrefix;
-            this._response = response;
-            this._options = responseOptions;
-            if (!response && responseOptions && responseOptions.length > 0) {
-                this._response = responseOptions[0];
-            }
+    constructor(question, unit, defaultPrefix, isInteger, responseOptions, response) {
+        this._question = question;
+        this._unit = unit;
+        this._defaultPrefix = defaultPrefix;
+        this._response = response;
+        this._options = responseOptions;
+        this._isInteger = isInteger == true ? true : false; 
+        if (!response && responseOptions && responseOptions.length > 0) {
+            this._response = responseOptions[0];
         }
+        
     }
     setResponse(response) {
         this._response = response;
@@ -88,17 +76,20 @@ class Question {
     getDefaultPrefix() {
         return this._defaultPrefix;
     }
+    isInteger(){
+        return this._isInteger;
+    }
 }
 
 const questions = [
-    new Question('Type of system', null, null, ['Symmetrical spacing', 'Unsymmetrical spacing']),
+    new Question('Type of system', null, null, null, ['Symmetrical spacing', 'Unsymmetrical spacing']),
     new Question('Spacing between conductors', 'm', 0),
-    new Question('Number of subconductors per bundle'),
+    new Question('Number of subconductors per bundle', null, null, true),
     new Question('Spacing between the subconductors', 'm', 0),
-    new Question('Number of strands in each subconductor'),
+    new Question('Number of strands in each subconductor', null, null, true),
     new Question('Diameter of each strand', 'm', 0),
     new Question('Line length in km', 'm', 0),
-    new Question('Model of the line', null, null, ['Short', 'Medium', 'Long']),
+    new Question('Model of the line', null, null, null, ['Short', 'Nominal Pi', 'Long']),
     new Question('Resistance of the line per km', 'Ω', 0),
     new Question('Power frequency', 'Hz', 0),
     new Question('Nominal system voltage', 'V', 3),
@@ -120,11 +111,13 @@ function insert(num){
 }
 
 function submit(){   
-    setQuestionValues();
-    createDownloadFile();
+    if (setQuestionValues()) {
+        createDownloadFile();
+    }
 }
 
 function setQuestionValues() {
+    let flag = true;
     for (let i = 0; i < questions.length; ++i) {
         if (questions[i].hasOptions()) {
             let select = document.getElementById(`select-value-${i+1}`);
@@ -134,12 +127,25 @@ function setQuestionValues() {
             let unitElement = document.getElementById(`select-units-${i+1}`);
             if (unitElement && unitElement.options.length > 1) {             
                 val = convertToSiUnits(val, unitElement.selectedIndex);
+            }
+            if (val < 0) {
+                alert(`Invalid negative input for ${questions[i].getQuestion()}`);
+                flag = false;
+                break;
             }  
+            if (questions[i].isInteger() && !Number.isInteger(val)) {
+                alert(`Invalid non-integer input for ${questions[i].getQuestion()}`);
+                flag = false;
+                break;
+            }
             questions[i].setResponse(val);
         } 
         // console.log(questions[i]);
     }
-    convertAllToEngMode();
+    if (flag) {
+        convertAllToEngMode();
+    }
+    return flag;
 }
 
 function convertAllToEngMode() {
