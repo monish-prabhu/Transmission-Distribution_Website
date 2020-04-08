@@ -22,15 +22,15 @@
                   
                 <li>
                     <h3>TYPE OF SYSTEM:</h3>
-                    <select name="TYPE OF SYSTEM" class="box">
+                    <select id="select-value-1" name="TYPE OF SYSTEM" class="box">
                         <option value="Symm">Symmetrical spacing</option>
                         <option value="UnSymm">UnSymmetrical spacing</option>
                     </select>
                 </li>
                 <li>
                     <h3>SPACING BETWEEN THE PHASE CONDUCTORS:
-                        <input type="number" name="numInp"> 
-                        <select name="units" class="box">
+                        <input id="input-value-2" type="number" name="numInp" step="0.01"> 
+                        <select id="select-units-2" name="units" class="box">
                             <option value="m">in m</option>
                             <option value="mm">in mm</option>
                             <option value="ft">in ft</option>
@@ -39,11 +39,11 @@
                     </h3>
                 </li>
                 <li>
-                    <h3>NUMBER OF SUBCONDUCTORS PER BUNDLE:<input type="number" name="n_subs"></h3>
+                    <h3>NUMBER OF SUBCONDUCTORS PER BUNDLE:<input id="input-value-3" type="number" name="n_subs" step="0.01"></h3>
                 </li>
                 <li>
-                    <h3>SPACING BETWEEN THE SUBCONDUCTORS:<input type="number" name="numInp"> 
-                        <select name="units" class="box">
+                    <h3>SPACING BETWEEN THE SUBCONDUCTORS:<input id="input-value-4" type="number" name="numInp" step="0.01"> 
+                        <select id="select-units-4" name="units" class="box">
                             <option value="m">in m</option>
                             <option value="mm">in mm</option>
                             <option value="ft">in ft</option>
@@ -52,11 +52,11 @@
                     </h3>
                 </li>
                 <li>
-                    <h3>NUMBER OF STRANDS IN EACH SUBCONDUCTOR: <input type="number"  name="n_strands" ></h3>
+                    <h3>NUMBER OF STRANDS IN EACH SUBCONDUCTOR: <input id="input-value-5" type="number"  name="n_strands"></h3>
                 </li>
                 <li>
-                    <h3>DIAMETER OF EACH STRAND: <input type="number" name="dia_strand">
-                        <select name="units" class="box">
+                    <h3>DIAMETER OF EACH STRAND: <input id="input-value-6" type="number" name="dia_strand" step="0.01">
+                        <select id="select-units-6" name="units" class="box">
                             <option value="m">in m</option>
                             <option value="mm">in mm</option>
                             <option value="ft">in ft</option>
@@ -66,11 +66,11 @@
                 </li>
             
                 <li>
-                    <h3>LENGTH OF THE LINE IN KM : <input type="number" name="len_line"></h3>
+                    <h3>LENGTH OF THE LINE IN KM : <input id="input-value-7" type="number" name="len_line" step="0.01"></h3>
                 </li>
                 <li>
                     <h3>MODEL OF THE LINE:
-                        <select name="model_type" class="box">
+                        <select id="select-value-8" name="model_type" class="box">
                             <option value="s">Short</option>
                             <option value="n">Nominal PI</option>
                             <option value="l">Long</option>
@@ -78,19 +78,19 @@
                     </h3>
                 </li>
                 <li>
-                    <h3>RESISTANCE OF THE LINE PER KM : <input type="number" name="dia_strand"></h3>
+                    <h3>RESISTANCE OF THE LINE PER KM : <input id="input-value-9" type="number" name="dia_strand" step="0.01"></h3>
                 </li> 
                 <li>
-                    <h3>POWER FREQUENCY : <input type="number" name="freq"></h3>
+                    <h3>POWER FREQUENCY : <input id="input-value-10" type="number" name="freq" step="0.01"></h3>
                 </li> 
                 <li>
-                    <h3>NOMINAL SYSTEM VOLTAGE : <input type="number" name="sys_voltge"></h3>
+                    <h3>NOMINAL SYSTEM VOLTAGE : <input id="input-value-11" type="number" name="sys_voltge" step="0.01"></h3>
                 </li>
                 <li>
-                    <h3>RECEIVING END LOAD IN MW : <input type="number" name="load"></h3>
+                    <h3>RECEIVING END LOAD IN MW : <input id="input-value-12" type="number" name="load" step="0.01"></h3>
                 </li>
                 <li>
-                    <h3>POWER FACTOR OF RECEIVING END LOAD: <input type="number" name="load_pf"></h3>
+                    <h3>POWER FACTOR OF RECEIVING END LOAD: <input id="input-value-13" type="number" name="load_pf" step="0.001"></h3>
                 </li>
             </ol>
 
