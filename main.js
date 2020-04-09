@@ -86,11 +86,6 @@ window.onload = () => {
     window.URL = window.webkitURL || window.URL;
 }
 
-function insert(num){
-            
-    // document.form.getElementsById("load").values = num;  
-}
-
 function submit(){   
     if (setQuestionValues()) {
         createDownloadFile();
