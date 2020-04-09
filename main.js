@@ -1,5 +1,5 @@
-var a;
-var downloadDiv, downloadButton;
+var downloadA;
+var outputDiv, downloadDiv, downloadButton;
 const units = ['m', 'mm', 'ft', 'inch'];
 const unitsMulipliers = [1, 0.001, 0.3048, 0.0254];
 const unitPrefix = {
@@ -79,7 +79,8 @@ const questions = [
 
 window.onload = () => {
     // console.log(`Questions: ${JSON.stringify(questions)}`);
-    a = document.createElement('a');
+    downloadA = document.createElement('a');
+    outputDiv = document.getElementById('output-div');
     downloadDiv = document.getElementById('download-div');
     downloadButton = document.getElementById('download-button');
     window.URL = window.webkitURL || window.URL;
@@ -142,10 +143,12 @@ function convertToSiUnits(num, unit) {
 }
 
 function convertToEngMode(num, unit, defaultPrefix) {
+    defaultPrefix = (defaultPrefix ? defaultPrefix : 0);
+    unit = (unit ? unit : '');
     if (num == 0) return 0 + unitPrefix[defaultPrefix] + unit;
     let l = Math.floor(Math.log10(num) + defaultPrefix);
     let nearest = Math.floor(l/3) * 3;
-    let val = Number.parseFloat(num / Math.pow(10, nearest - defaultPrefix)).toFixed(3).toString();
+    let val = roundValue(Number.parseFloat(num / Math.pow(10, nearest - defaultPrefix))).toString();
     // console.log(`val=${val}, unit=${unit}`);
     return `${val} ${unitPrefix[nearest]}${unit}`;
 }
@@ -161,21 +164,24 @@ function getDownloadText() {
 function createDownloadFile() {
     let bb = new Blob([getDownloadText()], {type: MIME_TYPE});
 
-    a.download = 'output.txt';
-    a.href = window.URL.createObjectURL(bb);
-    a.dataset.downloadurl = [MIME_TYPE, a.download, a.href].join(':');
-    a.draggable = true; 
-    a.classList.add('dragout');
+    downloadA.download = 'output.txt';
+    downloadA.href = window.URL.createObjectURL(bb);
+    downloadA.dataset.downloadurl = [MIME_TYPE, a.download, a.href].join(':');
+    downloadA.draggable = true; 
+    downloadA.classList.add('dragout');
 
-    a.append(downloadButton);
-    downloadDiv.appendChild(a);
+    downloadA.append(downloadButton);
+    downloadDiv.appendChild(downloadA);
 }
 
 const w = 500, h = 500;
-var ba = 65 * Math.PI/180, theta = 40 * Math.PI / 180;
+var ba, theta;
 var b2;
-const ox = 250, oy = 250;
-var r1 = 220, r2 = 90, r;
+const ox = w/2, oy = h/2;
+const maxL = 200;
+var vr = 6350, ir = 100, pr = 0.8, A = 1, B = 50, C = 0, alph = 0, beta = 80, delta, vs;
+var scaleD;
+var r1, r2, r;
 const ar = 10, tr = 20, lrx = 15, lry = 20;
 const dash = 5;
 const descScalar = 0.8, fracScalar = 3, numerWidth = 1.05;
@@ -183,12 +189,22 @@ var myFont;
 const axisStroke = 200;
 const strokeColor = 50;
 const textFill = 50, textStroke = 250;
-var cx = ox - r1 * Math.cos(ba), cy = oy + r1 * Math.sin(ba);
+var cx, cy;
 
 function setup() {
     let canvasContainer = document.getElementById('canvas-container');
-    canvas = createCanvas(500, 500);
+    canvas = createCanvas(w, h);
     canvas.parent('canvas-container');
+    // myFont = loadFont('ostrich-regular.ttf');
+    r2 = A * vr * vr / B;
+    r1 = vr * ir;
+    scaleD = maxL / max(r1, r2);
+    r1 = r1 * scaleD;
+    r2 = r2 * scaleD;
+    theta = Math.acos(pr);
+    ba = (beta - alph) * Math.PI/180;
+    cx = ox - r1 * Math.cos(ba);
+    cy = oy + r1 * Math.sin(ba);
     r = distance(cx, cy, ox+r2*Math.cos(theta), oy-r2*Math.sin(theta));
     b2 = angle(cx, cy, ox+r2*Math.cos(theta), oy-r2*Math.sin(theta));
 }
@@ -201,18 +217,17 @@ function draw() {
     textSize(14);
     if (myFont) textFont(myFont);
 
-    lineText(ox, oy, ox+r2*Math.cos(theta), oy-r2*Math.sin(theta), `|Vᵣ||Iᵣ| = ${roundValue(r2)}`);
+    lineText(ox, oy, ox+r2*Math.cos(theta), oy-r2*Math.sin(theta), `|Vᵣ||Iᵣ| = ${convertToEngMode(vr*ir, 'VA')}`);
     myArcText(ox, oy, 0, theta, `θᵣ = ${roundValue(degrees(theta))}°`);
 
-    lineText(ox, oy, cx, cy, `|A||Vᵣ|²~|B|*= ${roundValue(r1)}`, true, true);
+    lineText(ox, oy, cx, cy, `|A||Vᵣ|²~|B|*= ${convertToEngMode(A*vr*vr/B, 'VA')}`, true, true);
     myArcText(ox, oy, PI, PI+ba, `β-α \n=${roundValue(degrees(ba))}°`);
 
-    lineText(cx, cy, ox+r2*Math.cos(theta), oy-r2*Math.sin(theta), `|Vᵣ||Vₛ|~|B| *= ${roundValue(r)}`, true);
+    lineText(cx, cy, ox+r2*Math.cos(theta), oy-r2*Math.sin(theta), `|Vᵣ||Vₛ|~|B| *= ${convertToEngMode(r/scaleD, 'VA')}`, true);
     myArc(cx, cy, r, b2-PI/4, b2+PI/4);
 
     dottedLine(cx, cy, cx + r, cy);
     myArcText(cx, cy, 0, b2, `β-δ = ${roundValue(degrees(b2))}°`);
-  
 }
 
 function myArc(x, y, r, a1, a2) {
