@@ -13,28 +13,7 @@ const unitPrefix = {
 }
 const MIME_TYPE = 'text/plain';
 const GITHUB_PAGE_URL = 'https://monishtechy.github.io/website/';
-var canvas, resistorImg, inductorImg, backgroundImg, img;
-
-function setup() {
-    let canvasContainer = document.getElementById('canvas-container');
-    resistorImg = loadImage(GITHUB_PAGE_URL + 'resistor.png');
-    inductorImg = loadImage(GITHUB_PAGE_URL + 'inductor.png');
-    canvas = createCanvas(500, 500);
-    canvas.parent('canvas-container');
-}
-
-function draw() {
-    // line(40,100,80,100);
-    // image(resistorImg, 80, 87.5, 100, 25, 0, 0);
-    // line(180,100,220,100);
-    // image(inductorImg, 250, 83, 100, 25, 0, 0);
-    // line(220,100,260,100);
-}
-
-function arrow(x, y, w, h) {
-    triangle(x-w/2,y+h/2,x,y-h/2,x+w/2,y+h/2);
-    fill(0);
-  }
+var canvas;
 
 class Question {
     constructor(question, unit, defaultPrefix, isInteger, responseOptions, response) {
@@ -192,6 +171,140 @@ function createDownloadFile() {
     downloadDiv.appendChild(a);
 }
 
-function download() {
-   
+const w = 500, h = 500;
+var ba = 65 * Math.PI/180, theta = 40 * Math.PI / 180;
+var b2;
+const ox = 250, oy = 250;
+var r1 = 220, r2 = 90, r;
+const ar = 10, tr = 20, lrx = 15, lry = 20;
+const dash = 5;
+const descScalar = 0.8, fracScalar = 3, numerWidth = 1.05;
+var myFont;
+const axisStroke = 200;
+const strokeColor = 50;
+const textFill = 50, textStroke = 250;
+var cx = ox - r1 * Math.cos(ba), cy = oy + r1 * Math.sin(ba);
+
+function setup() {
+    let canvasContainer = document.getElementById('canvas-container');
+    canvas = createCanvas(500, 500);
+    canvas.parent('canvas-container');
+    r = distance(cx, cy, ox+r2*Math.cos(theta), oy-r2*Math.sin(theta));
+    b2 = angle(cx, cy, ox+r2*Math.cos(theta), oy-r2*Math.sin(theta));
+}
+
+function draw() {
+    stroke(axisStroke);
+    line(ox, oy - h/1.8, ox, oy + h/1.8);
+    line(ox - w/1.8, oy, ox + w/1.8, oy);
+    stroke(strokeColor);
+    textSize(14);
+    if (myFont) textFont(myFont);
+
+    lineText(ox, oy, ox+r2*Math.cos(theta), oy-r2*Math.sin(theta), `|Vᵣ||Iᵣ| = ${roundValue(r2)}`);
+    myArcText(ox, oy, 0, theta, `θᵣ = ${roundValue(degrees(theta))}°`);
+
+    lineText(ox, oy, cx, cy, `|A||Vᵣ|²~|B|*= ${roundValue(r1)}`, true, true);
+    myArcText(ox, oy, PI, PI+ba, `β-α \n=${roundValue(degrees(ba))}°`);
+
+    lineText(cx, cy, ox+r2*Math.cos(theta), oy-r2*Math.sin(theta), `|Vᵣ||Vₛ|~|B| *= ${roundValue(r)}`, true);
+    myArc(cx, cy, r, b2-PI/4, b2+PI/4);
+
+    dottedLine(cx, cy, cx + r, cy);
+    myArcText(cx, cy, 0, b2, `β-δ = ${roundValue(degrees(b2))}°`);
+  
+}
+
+function myArc(x, y, r, a1, a2) {
+    stroke(strokeColor);
+    noFill();
+    arc(x, y, 2*r, 2*r, 2*PI-a2, 2*PI-a1);
+}
+
+function myArcText(x, y, a1, a2, st) {
+    myArc(x, y, ar, a1, a2);
+    drawArcText(st, x, y, a1+(a2-a1)/2);
+}
+
+function drawArcText(st,x,y,ang) {
+    fill(textFill);
+    stroke(textStroke);
+    textAlign(CENTER, CENTER);
+
+    text(st,x+(ar+tr)*Math.cos(ang),y-(ar+tr)*Math.sin(ang));
+    stroke(strokeColor);
+
+    noFill();
+}
+
+function drawLineText(st, x1, y1, x2, y2, reverse, reduceSpace) {
+    fill(textFill);
+    stroke(textStroke);
+    textAlign(CENTER, CENTER);
+
+    let ang = angle(x1,y1,x2,y2) + (reverse ? -1 : 1)*PI/2;
+    let i1 = st.indexOf('~');
+    i1 = (i1 !== -1 ? i1 : st.length);
+    let num1 = st.slice(0,i1);
+    let tw1 = textWidth(num1);
+    let desc = textDescent() * descScalar * fracScalar;
+    let i2 = st.indexOf('*');
+    i2 = (i2 !== -1 ? i2 : st.length);
+    let den = st.slice(i1+1,i2); 
+    let num2 = st.slice(i2+1,st.length);
+    let tw2 = textWidth(num2);
+    // cx = cx - (tw1+tw2)/4;
+    let cx = (x1+x2)/2+(lrx+(tw1+tw2)/2)*Math.cos(ang), cy
+    if (i1 !== st.length) cy = (y1+y2)/2-(lry+2*desc)*Math.sin(ang);
+    else cy = (y1+y2)/2-lry*Math.sin(ang);
+    let cx2;
+    if (reduceSpace) cx2 = cx+(tw1+tw2)/2;
+    else cx2 = cx+(tw1+tw2)/2*numerWidth;
+
+    if (i1 === st.length) {
+        text(st,cx,cy);
+    } else {
+        text(num1,cx,cy);
+        text('―',cx,cy+desc);  
+        text(den,cx,cy+2*desc);
+        text(num2,cx2,cy+desc);
+
+        stroke(strokeColor);
+        noFill();
+    }
+}
+
+function lineText(x1, y1, x2, y2, st, reverse, reduceSpace) {
+    line(x1, y1, x2, y2);
+    drawLineText(st, x1, y1, x2, y2, reverse, reduceSpace);
+}
+
+function dottedLine(x1, y1, x2, y2) {
+    let ang = angle(x1, y1, x2, y2);
+    let d = distance(x1, y1, x2, y2);
+    let i=0;
+    for (let i=0; i<d; i+=2*dash) {
+        line(x1+i*Math.cos(ang), y1+i*Math.sin(ang), x1+(i+dash)*Math.cos(ang), y1+(i+dash)*Math.sin(ang));
+    }
+}
+
+function distance(x1, y1, x2, y2) {
+    return Math.sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
+}
+
+function angle(x1, y1, x2, y2) {
+    let t = Math.atan(-(y2-y1)/(x2-x1));
+    if (x1==x2) {
+    if (y2>y1) return -PI/2;
+    return PI/2;
+    }
+    if (x1>x2) {
+    if (y1==y2) return PI;
+    return PI + t;
+    }
+    return t;
+}
+
+function roundValue(x) {
+    return (x).toFixed(2).replace(/[.,]00$/, "");
 }
