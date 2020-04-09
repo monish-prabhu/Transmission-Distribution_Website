@@ -38,7 +38,7 @@ body{
 
 }
 .output{
-
+	display: none;
 }
 .box{
     background: #010707 ;

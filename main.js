@@ -72,7 +72,7 @@ const questions = [
     new Question('Model of the line', null, null, null, ['Short', 'Nominal Pi', 'Long']),
     new Question('Resistance of the line per km', 'Ω', 0),
     new Question('Power frequency', 'Hz', 0),
-    new Question('Nominal system voltage', 'V', 3),
+    new Question('Nominal system voltage', 'V', 0),
     new Question('Receiving end load', 'W', 6),
     new Question('Power factor of recieving end load')
 ];
@@ -94,6 +94,7 @@ function insert(num){
 function submit(){   
     if (setQuestionValues()) {
         createDownloadFile();
+        outputDiv.style.display = 'block';
     }
 }
 
@@ -104,13 +105,19 @@ function setQuestionValues() {
             let select = document.getElementById(`select-value-${i+1}`);
             questions[i].setResponseOption(select.selectedIndex);        
         } else {
-            let val = Number(document.getElementById(`input-value-${i+1}`).value);
+            let inputText = document.getElementById(`input-value-${i+1}`).value;
+            if (inputText == '') {
+                alert(`No input provided for ${questions[i].getQuestion()}`);
+                flag = false;
+                break;
+            }
+            let val = Number(inputText);
             let unitElement = document.getElementById(`select-units-${i+1}`);
             if (unitElement && unitElement.options.length > 1) {             
                 val = convertToSiUnits(val, unitElement.selectedIndex);
             }
-            if (val < 0) {
-                alert(`Invalid negative input for ${questions[i].getQuestion()}`);
+            if (val <= 0) {
+                alert(`Invalid non-positive input for ${questions[i].getQuestion()}`);
                 flag = false;
                 break;
             }  
@@ -121,7 +128,6 @@ function setQuestionValues() {
             }
             questions[i].setResponse(val);
         } 
-        // console.log(questions[i]);
     }
     if (flag) {
         convertAllToEngMode();
@@ -156,7 +162,7 @@ function convertToEngMode(num, unit, defaultPrefix) {
 function getDownloadText() {
     let str = '';
     for (let i = 0; i < questions.length; ++i) {
-        str += `${i}) ${questions[i].getQuestion()} : ${questions[i].getResponse()}\n`;
+        str += `${i+1}) ${questions[i].getQuestion()} : ${questions[i].getResponse()}\n`;
     }
     return str;
 }
@@ -166,7 +172,7 @@ function createDownloadFile() {
 
     downloadA.download = 'output.txt';
     downloadA.href = window.URL.createObjectURL(bb);
-    downloadA.dataset.downloadurl = [MIME_TYPE, a.download, a.href].join(':');
+    downloadA.dataset.downloadurl = [MIME_TYPE, downloadA.download, downloadA.href].join(':');
     downloadA.draggable = true; 
     downloadA.classList.add('dragout');
 
