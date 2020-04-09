@@ -5,6 +5,23 @@
     <meta charset="UTF-8">
     <script type="text/javascript" src="main.js"></script>
     <script src="p5.js"></script>
+    <script>
+        var foc;
+        function insert(num) 
+        {
+           document.getElementById(foc).value += num;
+
+        }
+        function clr()
+        {
+            document.getElementById(foc).value = '';
+        }
+        function del()
+        {   var value = document.getElementById(foc).value;
+            document.getElementById(foc).value = value.substr(0, value.length - 1);
+        }
+        
+    </script>
     
     <title>Calculator</title>
 
@@ -23,14 +40,14 @@
                   
                 <li>
                     <h3>TYPE OF SYSTEM:</h3>
-                    <select id="select-value-1" name="TYPE OF SYSTEM" class="box">
+                    <select id="select-value-1" name="TYPE OF SYSTEM" class="box" >
                         <option value="Symm">Symmetrical spacing</option>
                         <option value="UnSymm">UnSymmetrical spacing</option>
                     </select>
                 </li>
                 <li>
                     <h3>SPACING BETWEEN THE PHASE CONDUCTORS:
-                        <input id="input-value-2" type="number" name="numInp" step="0.01"> 
+                        <input id="input-value-2" class="ip" type="text" name="numInp" onfocus='foc="input-value-2"' step="0.01"> 
                         <select id="select-units-2" name="units" class="box">
                             <option value="m">in m</option>
                             <option value="mm">in mm</option>
@@ -40,10 +57,10 @@
                     </h3>
                 </li>
                 <li>
-                    <h3>NUMBER OF SUBCONDUCTORS PER BUNDLE:<input id="input-value-3" type="number" name="n_subs" step="0.01"></h3>
+                    <h3>NUMBER OF SUBCONDUCTORS PER BUNDLE:<input id="input-value-3" class="ip" type="text" name="n_subs" onfocus='foc="input-value-3"' step="0.01"></h3>
                 </li>
                 <li>
-                    <h3>SPACING BETWEEN THE SUBCONDUCTORS:<input id="input-value-4" type="number" name="numInp" step="0.01"> 
+                    <h3>SPACING BETWEEN THE SUBCONDUCTORS:<input id="input-value-4" class="ip" type="text" name="numInp" onfocus='foc="input-value-4"' step="0.01"> 
                         <select id="select-units-4" name="units" class="box">
                             <option value="m">in m</option>
                             <option value="mm">in mm</option>
@@ -53,10 +70,10 @@
                     </h3>
                 </li>
                 <li>
-                    <h3>NUMBER OF STRANDS IN EACH SUBCONDUCTOR: <input id="input-value-5" type="number"  name="n_strands"></h3>
+                    <h3>NUMBER OF STRANDS IN EACH SUBCONDUCTOR: <input id="input-value-5" class="ip" type="text" onfocus='foc="input-value-5"' name="n_strands"></h3>
                 </li>
                 <li>
-                    <h3>DIAMETER OF EACH STRAND: <input id="input-value-6" type="number" name="dia_strand" step="0.01">
+                    <h3>DIAMETER OF EACH STRAND: <input id="input-value-6" class="ip" type="text" name="dia_strand" onfocus='foc="input-value-6"' step="0.01">
                         <select id="select-units-6" name="units" class="box">
                             <option value="m">in m</option>
                             <option value="mm">in mm</option>
@@ -67,7 +84,7 @@
                 </li>
             
                 <li>
-                    <h3>LENGTH OF THE LINE IN KM : <input id="input-value-7" type="number" name="len_line" step="0.01"></h3>
+                    <h3>LENGTH OF THE LINE IN KM : <input id="input-value-7" class="ip" type="text" name="len_line" onfocus='foc="input-value-7"' step="0.01"></h3>
                 </li>
                 <li>
                     <h3>MODEL OF THE LINE:
@@ -79,19 +96,19 @@
                     </h3>
                 </li>
                 <li>
-                    <h3>RESISTANCE OF THE LINE PER KM : <input id="input-value-9" type="number" name="dia_strand" step="0.01"></h3>
+                    <h3>RESISTANCE OF THE LINE PER KM : <input id="input-value-9" class="ip" type="text" name="dia_strand" onfocus='foc="input-value-9"'step="0.01"></h3>
                 </li> 
                 <li>
-                    <h3>POWER FREQUENCY : <input id="input-value-10" type="number" name="freq" step="0.01"></h3>
+                    <h3>POWER FREQUENCY : <input id="input-value-10" class="ip" type="text" name="freq" onfocus='foc="input-value-10"' step="0.01"></h3>
                 </li> 
                 <li>
-                    <h3>NOMINAL SYSTEM VOLTAGE : <input id="input-value-11" type="number" name="sys_voltge" step="0.01"></h3>
+                    <h3>NOMINAL SYSTEM VOLTAGE : <input id="input-value-11" class="ip" type="text" name="sys_voltge" onfocus='foc="input-value-11"' step="0.01"></h3>
                 </li>
                 <li>
-                    <h3>RECEIVING END LOAD IN MW : <input id="input-value-12" type="number" name="load" step="0.01"></h3>
+                    <h3>RECEIVING END LOAD IN MW : <input id="input-value-12" class="ip" type="text" name="load" onfocus='foc="input-value-12"' step="0.01"></h3>
                 </li>
                 <li>
-                    <h3>POWER FACTOR OF RECEIVING END LOAD: <input id="input-value-13" type="number" name="load_pf" step="0.001"></h3>
+                    <h3>POWER FACTOR OF RECEIVING END LOAD: <input id="input-value-13" class="ip" type="text" name="load_pf" onfocus='foc="input-value-13"' step="0.001"></h3>
                 </li>
             </ol>
 
@@ -102,21 +119,21 @@
             <div id="calculator">
                 <div id="keyboard">
                 <form name="calci">    
-                    <button class="operator" id="clear">C</button>
-                    <button class="operator" id="backspace"> < </button>
-                    <button class="operator" id="^"> x10^ </button>
-                    <button class="number" id="7" onclick="insert(7)">7</button>
-                    <button class="number" id="8" onclick="insert(8)">8</button>
-                    <button class="number" id="9">9</button>
-                    <button class="number" id="4">4</button>
-                    <button class="number" id="5">5</button>
-                    <button class="number" id="6">6</button>
-                    <button class="number" id="1">1</button>
-                    <button class="number" id="2">2</button>
-                    <button class="number" id="3">3</button>
-                    <button class="operator" id=".">.</button>
-                    <button class="number" id="0">0</button>
-                    <button class="operator" id="-">-</button>
+                    <input type="button" class="operator" value="C" onclick="clr()"></input>
+                    <input type="button" class="operator" value="del" onclick="del()"></input>
+                    <input type="button" class="operator" value="x10^" onclick="insert('x10^')"></input>
+                    <input type="button" class="number" value="7" onclick="insert('7')"></input>
+                    <input type="button" class="number" value="8" onclick="insert('8')"></input>
+                    <input type="button" class="number" value="9" onclick="insert('9')"></input>
+                    <input type="button" class="number" value="4" onclick="insert('4')" ></input>
+                    <input type="button" class="number" value="5" onclick="insert('5')" ></input>
+                    <input type="button" class="number" value="6" onclick="insert('6')" ></input>
+                    <input type="button" class="number" value="1" onclick="insert('1')"></input>
+                    <input type="button" class="number" value="2" onclick="insert('2')"></input>
+                    <input type="button" class="number" value="3" onclick="insert('3')"></input>
+                    <input type="button" class="operator" value="." onclick="insert('.')"></input>
+                    <input type="button" class="number" value="0" onclick="insert('0')"></input>
+                    <input type="button" class="operator" value="-" onclick="insert('-')"></input>
                 </form>    
                 </div>
                 <div class="center"><button class="calculate" id="calc" onclick= 'submit()'>CALCULATE</button></div>
@@ -130,52 +147,52 @@
            
             <li>
                 <h3>INDUCTANCE PER PHASE PER KM IN H/Km =
-                    <input type="number" name="L">
+                    <input type="text" class="ip" name="L">
                 </h3>
             </li>
             <li>
                 <h3>CAPACITANCE PER PHASE PER KM IN F/Km =
-                    <input type="number" name="C"> 
+                    <input type="text" class="ip" name="C"> 
                     
                 </h3>
             </li>
             <li>
-                <h3>INDUCTIVE REACTANCE OF LINE IN OHM =<input type="number"  name="xl"></h3>
+                <h3>INDUCTIVE REACTANCE OF LINE IN OHM =<input type="text" class="ip" name="xl"></h3>
             </li>
             <li>
-                <h3>CAPACITIVE REACTANCE OF LINE IN OHM =<input type="number"  name="xc"></h3>
+                <h3>CAPACITIVE REACTANCE OF LINE IN OHM =<input type="text" class="ip" name="xc"></h3>
             </li>
             <li>
-                <h3>CHARGING CURRENT DRAWN FROM SENDING SUBSTATION = <input type="number"  name="icharge_s" ></h3>
+                <h3>CHARGING CURRENT DRAWN FROM SENDING SUBSTATION = <input type="text" class="ip" name="icharge_s" ></h3>
             </li>
             <li>
                 <h3>ABCD PARAMETERS OF THE LINE:
                    <ol type="i">
-                       <li><h3>A = <input type="number" name="A"></h3></li>
-                       <li><h3>B = <input type="number" name="B"></h3></li>
-                       <li><h3>C = <input type="number" name="C"></h3></li>
-                       <li><h3>D = <input type="number" name="D"></h3></li>
+                       <li><h3>A = <input type="text" class="ip" name="A"></h3></li>
+                       <li><h3>B = <input type="text" class="ip" name="B" ></h3></li>
+                       <li><h3>C = <input type="text" class="ip" name="C" ></h3></li>
+                       <li><h3>D = <input type="text" class="ip" name="D" ></h3></li>
                    </ol> 
                     
                 </h3>
             </li>
         
             <li>
-                <h3>SENDING END VOLTAGE IN kV(NOMINAL PI) = <input type="number" name="vnomi_s"></h3>
+                <h3>SENDING END VOLTAGE IN kV(NOMINAL PI) = <input type="text" class="ip" name="vnomi_s"></h3>
             </li>
             <li>
                 <h3>SENDING END CURRENT IN A =
-                    <input type="number" name="i_s">
+                    <input type="text" class="ip" name="i_s">
                 </h3>
             </li>
             <li>
-                <h3>% VOLTAGE REGULATION = <input type="number" name="dia_strand"></h3>
+                <h3>% VOLTAGE REGULATION = <input type="text" class="ip" name="dia_strand"></h3>
             </li> 
             <li>
-                <h3>POWER LOSS IN THE LINE IN MW = <input type="number" name="loss"></h3>
+                <h3>POWER LOSS IN THE LINE IN MW = <input type="text" class="ip" name="loss"></h3>
             </li> 
             <li>
-                <h3>% TRANSMISSION EFFICIENCY = <input type="number" name="trns_eff"></h3>
+                <h3>% TRANSMISSION EFFICIENCY = <input type="text" class="ip" name="trns_eff"></h3>
             </li>
         </ol>
         <div id="download-div" class="center"><button id="download-button" class="calculate">SAVE OUTPUT</button></div>

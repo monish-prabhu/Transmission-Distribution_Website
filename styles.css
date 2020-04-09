@@ -34,12 +34,7 @@ body{
 }
 
 
-.input{
 
-}
-.output{
-
-}
 .box{
     background: #010707 ;
     color: #fff;
@@ -81,7 +76,7 @@ body{
 #keyboard{
 	height: 400px;
 }
-.operator, .number, .empty{
+input.operator, input.number, input.empty{
 	width: 50px;
 	height: 50px;
 	margin: 15px;
@@ -91,16 +86,16 @@ body{
 	font-weight: bold;
 	font-size: 18px;
 }
-.number, .empty{
+input.number, input.empty{
 	background-color: #eaedef;
 }
-.number, .operator{
+input.number, input.operator{
 	cursor: pointer;
 }
-.operator:active, .number:active{
+input.operator:active, .number:active{
 	font-size: 13px;
 }
-.operator:focus, .number:focus, .empty:focus{
+input.operator:focus, .number:focus, .empty:focus{
 	outline: 0;
 }
 
@@ -125,7 +120,7 @@ body{
 	box-shadow: 0 5px #666;
 	transform: translateY(4px);
   }
-input{
+input.ip{
 	  margin-left: 20px;
 	  background-color : rgba(163, 162, 162, 0.37);
 	  border: 4px double black;
@@ -135,6 +130,6 @@ input{
 	  height: 25px;
 	  
 	}
-	input:focus {
+	input.ip:focus {
 		width: 300px;
 	  }
