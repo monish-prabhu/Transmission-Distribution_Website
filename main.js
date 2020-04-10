@@ -47,6 +47,7 @@ class ComplexNumber {
             this.imaginary = b ? b : 0;
             this.abs = Math.sqrt(this.real*this.real + this.imaginary*this.imaginary);
             this.angle = Math.atan(this.imaginary/this.real);
+            if (!this.angle) this.angle = 0;
         }
     }
     multiply(c) {
@@ -72,7 +73,7 @@ class ComplexNumber {
         return `${roundValue(this.real)} ${sign} j${roundValue(Math.abs(this.imaginary))}`;
     }
     polarForm() {
-        return `${roundValue(this.abs)}∠${roundValue(this.angle * 180 / PI)}°`;
+        return `${roundValueToThreeDecimals(this.abs)}∠${roundValue(positiveAngle(this.angle * 180 / PI))}°`;
     }
     copy() {
         return new ComplexNumber(this.real, this.imaginary);
@@ -92,8 +93,7 @@ class ComplexNumber {
     static multiply(c1, c2) {
         return c1.multiply(c2);
     }
-    static sqrt(c1, c2) {
-        let c = c1.multiply(c2);
+    static sqrt(c) {
         return new ComplexNumber(Math.sqrt(c.abs), c.angle/2, ComplexMode.POLAR);
     }
     static cosh(c) {
@@ -127,26 +127,28 @@ function solve() {
     ir = pr / (3 * vr * pfr);
     thetaR = Math.acos(pfr);
     let z = new ComplexNumber(resistancePerKm, xl/(lineLengthKm));
-    let y = new ComplexNumber(0, (1/xc)*lineLengthKm);
-    let Z = new ComplexNumber(resistance, xl), Y = y.multiplyScalar(lineLengthKm);
-    console.log(`z = ${z.rectForm()}, y = ${y.rectForm()}, Z = ${Z.rectForm()}, Y = ${Y.rectForm()}`)
+    let y = new ComplexNumber(0, (1/xc)/lineLengthKm);
+    let Z = new ComplexNumber(resistance, xl), Y = new ComplexNumber(0, 1/xc);
+    console.log(`z = ${z.rectForm()}, y = ${y.polarForm()}, Z = ${Z.rectForm()}, Y = ${Y.polarForm()}`)
     switch(lineModel) {
         case LineModels.SHORT: // A = 1, B = Z, C = 0, D = 1
             A = new ComplexNumber(1,0);
             B = Z.copy();
             C = new ComplexNumber(0,0);
             break;
-        case LineModels.NOMINAL_PI: // A = 1 + YZ/2, B = Z, C = Y + Y*Z^2/2, D = 1 + YZ/2
+        case LineModels.NOMINAL_PI: // A = 1 + YZ/2, B = Z, C = Y + Y^2*Z/4, D = 1 + YZ/2
             A = Z.multiply(Y).multiplyScalar(1/2).addScalar(1);
             B = Z.copy();
             C = Y.add(Z.multiply(Y).multiply(Y).multiplyScalar(1/4));
             break;
         case LineModels.LONG:
-            let gamma = ComplexNumber.sqrt(y, z);
+            let gamma = ComplexNumber.sqrt(y.multiply(z));
             let zc = ComplexNumber.sqrt(z.divide(y));
-            A = ComplexNumber.cosh(gamma.multiplyScalar(lineLength));
-            B = ComplexNumber.sinh(gamma.multiplyScalar(lineLength)).multiply(zc);
-            C = ComplexNumber.sinh(gamma.multiplyScalar(lineLength)).divide(zc);
+            console.log(gamma);
+            console.log(zc);
+            A = ComplexNumber.cosh(gamma.multiplyScalar(lineLengthKm));
+            B = ComplexNumber.sinh(gamma.multiplyScalar(lineLengthKm)).multiply(zc);
+            C = ComplexNumber.sinh(gamma.multiplyScalar(lineLengthKm)).divide(zc);
             break;
     }
     D = A.copy();
@@ -323,7 +325,7 @@ function setAnswerElements() {
         let answer = answers[i];
         let val = answer.value;
         if (answer.isComplex) {
-            val = val.rectForm();
+            val = val.polarForm();
         } else if (!answer.notConvert) {
             val = convertToEngMode(val, answer.unit, answer.defaultPrefix);
         } else {
@@ -598,16 +600,25 @@ function distance(x1, y1, x2, y2) {
 function angle(x1, y1, x2, y2) {
     let t = Math.atan(-(y2-y1)/(x2-x1));
     if (x1==x2) {
-    if (y2>y1) return -PI/2;
-    return PI/2;
+        if (y2>y1) return -PI/2;
+        return PI/2;
     }
     if (x1>x2) {
-    if (y1==y2) return PI;
-    return PI + t;
+        if (y1==y2) return PI;
+        return PI + t;
     }
     return t;
 }
 
 function roundValue(x) {
     return (x).toFixed(2).replace(/[.,]00$/, "");
+}
+
+function roundValueToThreeDecimals(x) {
+    return (x).toFixed(3).replace(/[.,]000$/, "");
+}
+
+function positiveAngle(x) {
+    if (x < 0) return x + 180;
+    return x;
 }
