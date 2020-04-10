@@ -1,5 +1,10 @@
 var downloadA;
 var outputDiv, downloadDiv, downloadButton;
+const LineModels = {
+    SHORT: 0,
+    NOMINAL_PI: 1,
+    LONG: 2
+}
 const UNITS = ['m', 'mm', 'ft', 'inch'];
 const UNIT_MULTIPLIERS = [1, 0.001, 0.3048, 0.0254];
 const UNIT_PREFIX = {
@@ -11,17 +16,379 @@ const UNIT_PREFIX = {
     '6': 'M',
     '9': 'G'
 }
+const ComplexMode = {
+    RECT: 0,
+    POLAR: 1
+}
 const MIME_TYPE = 'text/plain';
 const GITHUB_PAGE_URL = 'https://monishtechy.github.io/website/';
 const EPLISON = 8.8542 * Math.pow(10, -12);
 const PI = Math.PI, GMR_L = 0.7788;
 var symmetericalSpacing, distanceConductor, subconductorsPerConductor, distanceSubconductor, strands, diameterStrand, diameterSubconductor;
-var lineLength, lineModel, resistancePerKm, frequency;
-var xc, xl;
-var vr, ir, pfr, pr;
-var vs, is, pfs, ps;
-var A, B, C, D, alph, beta, gamma, delta;
-var canvas;
+var lineLength, lineLengthKm, lineModel, resistancePerKm, frequency;
+var inductance, capacitance, resistance, xc, xl;
+var vr, ir, pfr, pr, thetaR;
+var vs, is, pfs, ps, thetaS;
+var chargingCurrent;
+var reg, eff;
+var A, B, C, D, delta;
+var answers;
+var canvas, canDraw = false;
+
+class ComplexNumber {
+    constructor(a, b, mode) {
+        if (mode == ComplexMode.POLAR) { 
+            this.abs = a;
+            this.angle = b;
+            this.real = this.abs * Math.cos(this.angle);
+            this.imaginary = this.abs * Math.sin(this.angle);
+        } else {
+            this.real = a;
+            this.imaginary = b ? b : 0;
+            this.abs = Math.sqrt(this.real*this.real + this.imaginary*this.imaginary);
+            this.angle = Math.atan(this.imaginary/this.real);
+        }
+    }
+    multiply(c) {
+        return new ComplexNumber(this.abs * c.abs, this.angle + c.angle, ComplexMode.POLAR);
+    }
+    multiplyScalar(num) {
+        return new ComplexNumber(this.real * num, this.imaginary * num);
+    }
+    divide(c) {
+        return new ComplexNumber(this.abs / c.abs, this.angle - c.angle, ComplexMode.POLAR);
+    }
+    add(c) {
+        return new ComplexNumber(this.real + c.real, this.imaginary + c.imaginary);
+    }
+    addScalar(num) {
+        return new ComplexNumber(this.real + num, this.imaginary);
+    }
+    inverse() {
+        return new ComplexNumber(1/this.abs, -this.angle, ComplexMode.POLAR);
+    }
+    rectForm() {
+        let sign = (this.imaginary < 0 ? '-' : '+');
+        return `${roundValue(this.real)} ${sign} j${roundValue(Math.abs(this.imaginary))}`;
+    }
+    polarForm() {
+        return `${roundValue(this.abs)}∠${roundValue(this.angle * 180 / PI)}°`;
+    }
+    copy() {
+        return new ComplexNumber(this.real, this.imaginary);
+    }
+    static add(c1, c2) {
+        return c1.add(c2);
+    }
+    static addScalar(c1, num) {
+        return c1.addScalar(num);
+    }
+    static divide(c1, c2) {
+        return c1.divide(c2);
+    }
+    static multiplyScalar(c1, num) {
+        return c1.multiplyScalar(num);
+    }
+    static multiply(c1, c2) {
+        return c1.multiply(c2);
+    }
+    static sqrt(c1, c2) {
+        let c = c1.multiply(c2);
+        return new ComplexNumber(Math.sqrt(c.abs), c.angle/2, ComplexMode.POLAR);
+    }
+    static cosh(c) {
+        let a = c.real, b = c.imaginary;
+        return new ComplexNumber(Math.cos(b) * Math.cosh(a), Math.sin(b) * Math.sinh(a));
+    }
+    static sinh(c) {
+        let a = c.real, b = c.imaginary;
+        return new ComplexNumber(Math.cos(b) * Math.sinh(a), Math.sin(b) * Math.cosh(a));
+    }
+}
+
+window.onload = () => {
+    // console.log(`Questions: ${JSON.stringify(questions)}`);
+    downloadA = document.createElement('a');
+    outputDiv = document.getElementById('output-div');
+    downloadDiv = document.getElementById('download-div');
+    downloadButton = document.getElementById('download-button');
+    window.URL = window.webkitURL || window.URL;
+}
+
+function solve() {
+    diameterSubconductor = getDiameterSubconductor(strands, diameterStrand);
+    inductance = getInductance();
+    capacitance = getCapacitance();
+    resistance = resistancePerKm * lineLengthKm;
+    xl = 2 * PI * frequency * inductance * lineLength;
+    xc = 1 / (2 * PI * frequency * capacitance * lineLength);
+    console.log(`L = ${inductance}, C = ${capacitance}, XL = ${xl}, XC = ${xc}, lineLengthKm = ${lineLengthKm}`);
+    vr /= Math.sqrt(3); // Phase Voltage
+    ir = pr / (3 * vr * pfr);
+    thetaR = Math.acos(pfr);
+    let z = new ComplexNumber(resistancePerKm, xl/(lineLengthKm));
+    let y = new ComplexNumber(0, (1/xc)*lineLengthKm);
+    let Z = new ComplexNumber(resistance, xl), Y = y.multiplyScalar(lineLengthKm);
+    console.log(`z = ${z.rectForm()}, y = ${y.rectForm()}, Z = ${Z.rectForm()}, Y = ${Y.rectForm()}`)
+    switch(lineModel) {
+        case LineModels.SHORT: // A = 1, B = Z, C = 0, D = 1
+            A = new ComplexNumber(1,0);
+            B = Z.copy();
+            C = new ComplexNumber(0,0);
+            break;
+        case LineModels.NOMINAL_PI: // A = 1 + YZ/2, B = Z, C = Y + Y*Z^2/2, D = 1 + YZ/2
+            A = Z.multiply(Y).multiplyScalar(1/2).addScalar(1);
+            B = Z.copy();
+            C = Y.add(Z.multiply(Y).multiply(Y).multiplyScalar(1/4));
+            break;
+        case LineModels.LONG:
+            let gamma = ComplexNumber.sqrt(y, z);
+            let zc = ComplexNumber.sqrt(z.divide(y));
+            A = ComplexNumber.cosh(gamma.multiplyScalar(lineLength));
+            B = ComplexNumber.sinh(gamma.multiplyScalar(lineLength)).multiply(zc);
+            C = ComplexNumber.sinh(gamma.multiplyScalar(lineLength)).divide(zc);
+            break;
+    }
+    D = A.copy();
+
+    let irComplex = new ComplexNumber(ir, -thetaR);
+    let vsComplex = A.multiplyScalar(vr).add(B.multiply(irComplex));
+    let isComplex = C.multiplyScalar(vr).add(D.multiply(irComplex));
+    vs = vsComplex.abs;
+    is = isComplex.abs;
+    thetaS = isComplex.angle - vsComplex.angle;
+    pfs = Math.cos(thetaS);
+    ps = 3 * vs * is;
+
+    if (lineModel == LineModels.SHORT) {
+        chargingCurrent = 0;
+    } else {
+        chargingCurrent = vs * Y.abs;
+    }
+    
+    reg = (vs/A.abs - vr) / vr * 100;
+    eff = pr / ps * 100;
+
+    console.log(`Recieving end: I = ${ir}, V = ${vr}, pf = ${pfr}, P = ${pr}; Sending end: V = ${vs}, I = ${is}, pf = ${pfs}, P = ${ps}`)
+
+    answers = [
+        new Answer('inductance', inductance * 1000, 'Inductance per phase per km in H/km', 'H/km'),
+        new Answer('capacitance', capacitance * 1000, 'Capacitance per phase per km in F/km', 'F/km'),
+        new Answer('inductive-reactance', xl, 'Inductive reactance of the line in Ohm', 'Ω'),
+        new Answer('capacitive-reactance', xc, 'Capacitive reactance of the line in Ohm', 'Ω'),
+        new Answer('charging-current', chargingCurrent, 'Charging current drawn from the sending end substation', 'A'),
+        new Answer('A', A, 'A', '', 0, true),
+        new Answer('B', B, 'B', 'Ω', 0, true),
+        new Answer('C', C, 'C', '℧', 0, true),
+        new Answer('D', D, 'D', '', 0, true),
+        new Answer('sending-end-voltage', vs * Math.sqrt(3), 'Sending end voltage, if the receiving end voltage is maintained at nominal system voltage', 'V', 3),
+        new Answer('sending-end-current', is, 'Sending end current', 'A'),
+        new Answer('voltage-regulation', reg, 'Percentage voltage regulation', '%', 0, false, true),
+        new Answer('power-loss', (ps-pr), 'Power loss int the line', 'W', 6),
+        new Answer('efficiency', eff, 'Transmission efficiency', '%', 0, false, true)
+    ] 
+}
+
+function sgmd(n, d) {
+    let theta = 2*PI/n;
+    if (n <= 1) return 1;
+    let dr = d / (2*sin(theta/2));
+    let ans = 1;
+    for (let i = 1; i < n; ++i) {
+        ans *= Math.pow(distance(dr, 0, dr*Math.cos(i*theta), dr*Math.sin(i*theta)), 1/n);
+    }
+    return ans;
+}
+
+function sgmdC(n, distance, radius) {
+    return sgmd(n, distance) * Math.pow(radius, 1/n);
+}
+
+function sgmdL(n, distance, radius) {
+    return sgmd(n, distance) * Math.pow(radius * GMR_L, 1/n);
+}
+
+function getDiameterSubconductor(strands, diameter) {
+    let n = 1;
+    while ((3*n*n - 3*n + 1) < strands) {
+        ++n;
+    }
+    return (2*n - 1) * diameter;
+}
+
+function getInductance() {
+    let mg = distanceConductor;
+    let sg = sgmdL(subconductorsPerConductor, distanceSubconductor, diameterSubconductor/2);
+    // console.log(`Inductance: SGMD = ${sg}, MGMD = ${mg}`);
+    return 2 * Math.pow(10, -7) * Math.log10(mg / sg) / Math.LOG10E;
+}
+
+function getCapacitance() {
+    let mg = distanceConductor;
+    let sg = sgmdC(subconductorsPerConductor, distanceSubconductor, diameterSubconductor/2);
+    // console.log(`Capacitance: SGMD = ${sg}, MGMD = ${mg}`);
+    return 2 * PI * EPLISON / Math.log10(mg / sg) * Math.LOG10E;
+}
+
+function submit(){   
+    if (setQuestionValues()) {
+        setVariableValues();
+        solve();
+        setupDiagramValues();
+        canDraw = true;
+        convertAllToEngMode();
+        setAnswerElements();
+        createDownloadFile();
+        outputDiv.style.display = 'block';
+    }
+}
+
+function setQuestionValues() {
+    let flag = true;
+    for (let i = 0; i < questions.length; ++i) {
+        if (questions[i].hasOptions()) {
+            let select = document.getElementById(`select-value-${i+1}`);
+            questions[i].setResponseOption(select.selectedIndex);        
+        } else {
+            let inputText = document.getElementById(`input-value-${i+1}`).value;
+            if (inputText == '') {
+                alert(`No input provided for ${questions[i].getQuestion()}`);
+                flag = false;
+                break;
+            }
+            let val = Number(inputText);
+            let unitElement = document.getElementById(`select-units-${i+1}`);
+            if (unitElement && unitElement.options.length > 1) {             
+                val = convertToSiUnits(val, unitElement.selectedIndex);
+            }
+            if (val <= 0 && i != questions.length-1) {
+                alert(`Invalid non-positive input for ${questions[i].getQuestion()}`);
+                flag = false;
+                break;
+            }  
+            if (questions[i].isInteger() && !Number.isInteger(val)) {
+                alert(`Invalid non-integer input for ${questions[i].getQuestion()}`);
+                flag = false;
+                break;
+            }
+            val *= Math.pow(10, questions[i].getDefaultPrefix());
+            questions[i].setResponse(val);
+        } 
+    }
+    return flag;
+}
+
+function setVariableValues() {
+    symmetericalSpacing = (questions[0].getResponseOption() == 0);
+    distanceConductor = questions[1].getResponse();
+    subconductorsPerConductor = questions[2].getResponse();
+    distanceSubconductor = questions[3].getResponse();
+    strands = questions[4].getResponse();
+    diameterStrand = questions[5].getResponse();
+    lineLength = questions[6].getResponse();
+    lineLengthKm = lineLength / 1000;
+    resistancePerKm = questions[8].getResponse();
+    frequency = questions[9].getResponse();
+    vr = questions[10].getResponse();
+    pr = questions[11].getResponse();
+    pfr = questions[12].getResponse();
+
+    lineModel = (x => {
+        switch(x) {
+            case 0: return LineModels.SHORT;
+            case 1: return LineModels.NOMINAL_PI;
+            case 2: return LineModels.LONG;
+            default: return LineModels.SHORT;
+        }
+    })(questions[7].getResponseOption());
+}
+
+class Answer {
+    constructor(id, value, detail, unit, defaultPrefix, isComplex, notConvert) {
+        this.id = id;
+        this.value = value;
+        this.detail = detail;
+        this.unit = unit ? unit : '';
+        this.defaultPrefix = defaultPrefix ? defaultPrefix : 0;
+        this.isComplex = isComplex ? true : false;
+        this.notConvert = notConvert ? true : false;
+    }
+    setFormatted(response) {
+        this.response = response;
+    }
+}
+
+function setAnswerElements() {
+    for (let i=0; i<answers.length; ++i) {
+        let answer = answers[i];
+        let val = answer.value;
+        if (answer.isComplex) {
+            val = val.rectForm();
+        } else if (!answer.notConvert) {
+            val = convertToEngMode(val, answer.unit, answer.defaultPrefix);
+        } else {
+            val = `${roundValue(val)} ${answer.unit}`;
+        }
+        answer.setFormatted(val);
+        console.log(answer);
+        document.getElementById(answer.id).value = val;
+    }
+}
+
+function convertAllToEngMode() {
+    for (let i = 0; i < questions.length; ++i) {
+        if (questions[i].hasUnit()) {
+            questions[i].setResponseFormatted(convertToEngMode(questions[i].getResponse(), questions[i].getUnit(), questions[i].getDefaultPrefix()));
+        } else {
+            questions[i].setResponseFormatted(questions[i].getResponse());
+        }
+    }
+    // console.log(questions);
+}
+
+function convertToSiUnits(num, unit) {
+    return num * UNIT_MULTIPLIERS[unit];
+}
+
+function convertToEngMode(num, unit, defaultPrefix) {
+    unit = (unit ? unit : '');
+    defaultPrefix = (defaultPrefix ? defaultPrefix : 0);
+    if (num == 0) return `0 ${unit}`;
+    if (defaultPrefix != 0) {
+        let val = roundValue(Number.parseFloat(num / Math.pow(10, defaultPrefix))).toString();
+        return `${val} ${UNIT_PREFIX[defaultPrefix]}${unit}`;
+    }
+    let l = Math.floor(Math.log10(num));
+    let nearest = Math.floor(l/3) * 3;
+    let val = roundValue(Number.parseFloat(num / Math.pow(10, nearest))).toString();
+    // console.log(`val=${val}, unit=${unit}`);
+    return `${val} ${UNIT_PREFIX[nearest]}${unit}`;
+}
+
+function getDownloadText() {
+    let str = 'Input\n';
+    for (let i = 0; i < questions.length; ++i) {
+        str += `${i+1}) ${questions[i].getQuestion()} : ${questions[i].getResponseFormatted()}\n`;
+    }
+    str += '\nOutput\n'
+    for (let i = 0; i < answers.length; ++i) {
+        str += `${i+1}) ${answers[i].detail} = ${answers[i].response}\n`;
+    }
+    return str;
+}
+
+function createDownloadFile() {
+    let bb = new Blob([getDownloadText()], {type: MIME_TYPE});
+
+    downloadA.download = 'output.txt';
+    downloadA.href = window.URL.createObjectURL(bb);
+    downloadA.dataset.downloadurl = [MIME_TYPE, downloadA.download, downloadA.href].join(':');
+    downloadA.draggable = true; 
+    downloadA.classList.add('dragout');
+
+    downloadA.append(downloadButton);
+    downloadDiv.appendChild(downloadA);
+}
 
 class Question {
     constructor(question, unit, defaultPrefix, isInteger, responseOptions, response) {
@@ -79,7 +446,7 @@ class Question {
     }
 }
 
-const questions = [
+var questions = [
     new Question('Type of system', null, null, null, ['Symmetrical spacing', 'Unsymmetrical spacing']),
     new Question('Spacing between conductors', 'm', 0),
     new Question('Number of subconductors per bundle', null, null, true),
@@ -95,175 +462,8 @@ const questions = [
     new Question('Power factor of recieving end load')
 ];
 
-window.onload = () => {
-    // console.log(`Questions: ${JSON.stringify(questions)}`);
-    downloadA = document.createElement('a');
-    outputDiv = document.getElementById('output-div');
-    downloadDiv = document.getElementById('download-div');
-    downloadButton = document.getElementById('download-button');
-    window.URL = window.webkitURL || window.URL;
-}
-
-function solve() {
-    let l = getInductance();
-    let c = getCapacitance();
-    xl = 2 * PI * frequency * l * lineLength;
-    xc = 1 / (2 * PI * frequency * c * lineLength);
-    // console.log(`L = ${l}, C = ${c}, XL = ${xl}, XC = ${xc}`);
-}
-
-function sgmd(n, d) {
-    let theta = 2*PI/n;
-    if (n <= 1) return 1;
-    let dr = d / (2*sin(theta/2));
-    let ans = 1;
-    for (let i = 1; i < n; ++i) {
-        ans *= Math.pow(distance(dr, 0, dr*Math.cos(i*theta), dr*Math.sin(i*theta)), 1/n);
-    }
-    return ans;
-}
-
-function sgmdC(n, distance, radius) {
-    return sgmd(n, distance) * Math.pow(radius, 1/n);
-}
-
-function sgmdL(n, distance, radius) {
-    return sgmd(n, distance) * Math.pow(radius * GMR_L, 1/n);
-}
-
-function getDiameterSubconductor(strands, diameter) {
-    let n = 1;
-    while ((3*n*n - 3*n + 1) < strands) {
-        ++n;
-    }
-    return (2*n - 1) * diameter;
-}
-
-function getInductance() {
-    let mg = distanceConductor;
-    let sg = sgmdL(subconductorsPerConductor, distanceSubconductor, diameterSubconductor/2);
-    // console.log(`Inductance: SGMD = ${sg}, MGMD = ${mg}`);
-    return 2 * Math.pow(10, -7) * Math.log10(mg / sg) / Math.LOG10E;
-}
-
-function getCapacitance() {
-    let mg = distanceConductor;
-    let sg = sgmdC(subconductorsPerConductor, distanceSubconductor, diameterSubconductor/2);
-    // console.log(`Capacitance: SGMD = ${sg}, MGMD = ${mg}`);
-    return 2 * PI * EPLISON / Math.log10(mg / sg) * Math.LOG10E;
-}
-
-function submit(){   
-    if (setQuestionValues()) {
-        setVariableValues();
-        clear();
-        solve();
-        convertAllToEngMode();
-        createDownloadFile();
-        outputDiv.style.display = 'block';
-    }
-}
-
-function setQuestionValues() {
-    let flag = true;
-    for (let i = 0; i < questions.length; ++i) {
-        if (questions[i].hasOptions()) {
-            let select = document.getElementById(`select-value-${i+1}`);
-            questions[i].setResponseOption(select.selectedIndex);        
-        } else {
-            let inputText = document.getElementById(`input-value-${i+1}`).value;
-            if (inputText == '') {
-                alert(`No input provided for ${questions[i].getQuestion()}`);
-                flag = false;
-                break;
-            }
-            let val = Number(inputText);
-            let unitElement = document.getElementById(`select-units-${i+1}`);
-            if (unitElement && unitElement.options.length > 1) {             
-                val = convertToSiUnits(val, unitElement.selectedIndex);
-            }
-            if (val <= 0 && i != questions.length-1) {
-                alert(`Invalid non-positive input for ${questions[i].getQuestion()}`);
-                flag = false;
-                break;
-            }  
-            if (questions[i].isInteger() && !Number.isInteger(val)) {
-                alert(`Invalid non-integer input for ${questions[i].getQuestion()}`);
-                flag = false;
-                break;
-            }
-            val *= Math.pow(10, questions[i].getDefaultPrefix());
-            questions[i].setResponse(val);
-        } 
-    }
-    return flag;
-}
-
-function setVariableValues() {
-    symmetericalSpacing = (questions[0].getResponseOption() == 0);
-    distanceConductor = questions[1].getResponse();
-    subconductorsPerConductor = questions[2].getResponse();
-    distanceSubconductor = questions[3].getResponse();
-    strands = questions[4].getResponse();
-    diameterStrand = questions[5].getResponse();
-    lineLength = questions[6].getResponse();
-    lineModel = questions[7].getResponseOption();
-    resistancePerKm = questions[8].getResponse();
-    frequency = questions[9].getResponse();
-    vr = questions[10].getResponse();
-    pr = questions[11].getResponse();
-    pfr = questions[12].getResponse();
-    diameterSubconductor = getDiameterSubconductor(strands, diameterStrand);
-}
-
-function convertAllToEngMode() {
-    for (let i = 0; i < questions.length; ++i) {
-        if (questions[i].hasUnit()) {
-            questions[i].setResponseFormatted(convertToEngMode(questions[i].getResponse(), questions[i].getUnit(), questions[i].getDefaultPrefix()));
-        } else {
-            questions[i].setResponseFormatted(questions[i].getResponse());
-        }
-    }
-    // console.log(questions);
-}
-
-function convertToSiUnits(num, unit) {
-    return num * UNIT_MULTIPLIERS[unit];
-}
-
-function convertToEngMode(num, unit) {
-    unit = (unit ? unit : '');
-    if (num == 0) return 0 + UNIT_PREFIX[defaultPrefix] + unit;
-    let l = Math.floor(Math.log10(num));
-    let nearest = Math.floor(l/3) * 3;
-    let val = roundValue(Number.parseFloat(num / Math.pow(10, nearest))).toString();
-    // console.log(`val=${val}, unit=${unit}`);
-    return `${val} ${UNIT_PREFIX[nearest]}${unit}`;
-}
-
-function getDownloadText() {
-    let str = '';
-    for (let i = 0; i < questions.length; ++i) {
-        str += `${i+1}) ${questions[i].getQuestion()} : ${questions[i].getResponseFormatted()}\n`;
-    }
-    return str;
-}
-
-function createDownloadFile() {
-    let bb = new Blob([getDownloadText()], {type: MIME_TYPE});
-
-    downloadA.download = 'output.txt';
-    downloadA.href = window.URL.createObjectURL(bb);
-    downloadA.dataset.downloadurl = [MIME_TYPE, downloadA.download, downloadA.href].join(':');
-    downloadA.draggable = true; 
-    downloadA.classList.add('dragout');
-
-    downloadA.append(downloadButton);
-    downloadDiv.appendChild(downloadA);
-}
-
 const w = 500, h = 500;
-var ba, thetaR;
+var ba;
 var b2;
 const ox = w/2, oy = h/2;
 const maxL = 200;
@@ -272,51 +472,50 @@ var r1, r2, r;
 const ar = 10, tr = 20, lrx = 15, lry = 20;
 const dash = 5;
 const descScalar = 0.8, fracScalar = 3, numerWidth = 1.05;
-var myFont;
 const axisStroke = 200;
 const strokeColor = 50;
 const textFill = 50, textStroke = 250;
 var cx, cy;
 
-function setup() {
-    let canvasContainer = document.getElementById('canvas-container');
-    canvas = createCanvas(w, h);
-    canvas.parent('canvas-container');
-    vr = 6350, ir = 100, pfr = 0.8;
-    A = 1, B = 50, C = 0, alph = 0, beta = 80;
-    // myFont = loadFont('ostrich-regular.ttf');
-    r2 = A * vr * vr / B;
-    r1 = vr * ir;
+function setupDiagramValues() {
+    r1 = A.abs * vr * vr / B.abs;
+    r2 = vr * ir;
     scaleD = maxL / max(r1, r2);
     r1 = r1 * scaleD;
     r2 = r2 * scaleD;
-    thetaR = Math.acos(pfr);
-    ba = (beta - alph) * PI/180;
+    ba = B.angle - A.angle;
     cx = ox - r1 * Math.cos(ba);
     cy = oy + r1 * Math.sin(ba);
     r = distance(cx, cy, ox+r2*Math.cos(thetaR), oy-r2*Math.sin(thetaR));
     b2 = angle(cx, cy, ox+r2*Math.cos(thetaR), oy-r2*Math.sin(thetaR));
 }
 
+function setup() {
+    let canvasContainer = document.getElementById('canvas-container');
+    canvas = createCanvas(w, h);
+    canvas.parent('canvas-container'); 
+}
+
 function draw() {
-    stroke(axisStroke);
-    line(ox, oy - h/1.8, ox, oy + h/1.8);
-    line(ox - w/1.8, oy, ox + w/1.8, oy);
-    stroke(strokeColor);
-    textSize(14);
-    if (myFont) textFont(myFont);
+    if (canDraw) {
+        stroke(axisStroke);
+        line(ox, oy - h/1.8, ox, oy + h/1.8);
+        line(ox - w/1.8, oy, ox + w/1.8, oy);
+        stroke(strokeColor);
+        textSize(14);
 
-    lineText(ox, oy, ox+r2*Math.cos(thetaR), oy-r2*Math.sin(thetaR), `|Vᵣ||Iᵣ| = ${convertToEngMode(vr*ir, 'VA')}`);
-    myArcText(ox, oy, 0, thetaR, `θᵣ = ${roundValue(degrees(thetaR))}°`);
+        lineText(ox, oy, ox+r2*Math.cos(thetaR), oy-r2*Math.sin(thetaR), `|Vᵣ||Iᵣ| = ${convertToEngMode(vr*ir, 'VA')}`);
+        myArcText(ox, oy, 0, thetaR, `θᵣ = ${roundValue(degrees(thetaR))}°`);
 
-    lineText(ox, oy, cx, cy, `|A||Vᵣ|²~|B|*= ${convertToEngMode(A*vr*vr/B, 'VA')}`, true, true);
-    myArcText(ox, oy, PI, PI+ba, `β-α \n=${roundValue(degrees(ba))}°`);
+        lineText(ox, oy, cx, cy, `|A||Vᵣ|²~|B|*= ${convertToEngMode(A.abs*vr*vr/B.abs, 'VA')}`, true, true);
+        myArcText(ox, oy, PI, PI+ba, `β-α \n=${roundValue(degrees(ba))}°`);
 
-    lineText(cx, cy, ox+r2*Math.cos(thetaR), oy-r2*Math.sin(thetaR), `|Vᵣ||Vₛ|~|B| *= ${convertToEngMode(r/scaleD, 'VA')}`, true);
-    myArc(cx, cy, r, b2-PI/4, b2+PI/4);
+        lineText(cx, cy, ox+r2*Math.cos(thetaR), oy-r2*Math.sin(thetaR), `|Vᵣ||Vₛ|~|B| *= ${convertToEngMode(r/scaleD, 'VA')}`, true);
+        myArc(cx, cy, r, b2-PI/4, b2+PI/4);
 
-    dottedLine(cx, cy, cx + r, cy);
-    myArcText(cx, cy, 0, b2, `β-δ = ${roundValue(degrees(b2))}°`);
+        dottedLine(cx, cy, cx + r, cy);
+        myArcText(cx, cy, 0, b2, `β-δ = ${roundValue(degrees(b2))}°`);
+    }
 }
 
 function myArc(x, y, r, a1, a2) {

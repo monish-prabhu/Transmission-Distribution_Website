@@ -146,60 +146,60 @@
         <ol style="font-size: larger;font-weight: bold;margin-left: 30px;" type="I">
            
             <li>
-                <h3>INDUCTANCE PER PHASE PER KM IN H/Km =
-                    <input type="text" class="ip" name="L">
+                <h3>INDUCTANCE PER PHASE PER KM =
+                    <input id="inductance" type="text" class="ip" name="L">
                 </h3>
             </li>
             <li>
-                <h3>CAPACITANCE PER PHASE PER KM IN F/Km =
-                    <input type="text" class="ip" name="C"> 
+                <h3>CAPACITANCE PER PHASE PER KM =
+                    <input id="capacitance" disabled="true" type="text" class="ip" name="C"> 
                     
                 </h3>
             </li>
             <li>
-                <h3>INDUCTIVE REACTANCE OF LINE IN OHM =<input type="text" class="ip" name="xl"></h3>
+                <h3>INDUCTIVE REACTANCE OF LINE =<input id="inductive-reactance" disabled="true" type="text" class="ip" name="xl"></h3>
             </li>
             <li>
-                <h3>CAPACITIVE REACTANCE OF LINE IN OHM =<input type="text" class="ip" name="xc"></h3>
+                <h3>CAPACITIVE REACTANCE OF LINE =<input id="capacitive-reactance" disabled="true" type="text" class="ip" name="xc"></h3>
             </li>
             <li>
-                <h3>CHARGING CURRENT DRAWN FROM SENDING SUBSTATION = <input type="text" class="ip" name="icharge_s" ></h3>
+                <h3>CHARGING CURRENT DRAWN FROM SENDING SUBSTATION = <input id="charging-current" disabled="true" type="text" class="ip" name="icharge_s" ></h3>
             </li>
             <li>
                 <h3>ABCD PARAMETERS OF THE LINE:
                    <ol type="i">
-                       <li><h3>A = <input type="text" class="ip" name="A"></h3></li>
-                       <li><h3>B = <input type="text" class="ip" name="B" ></h3></li>
-                       <li><h3>C = <input type="text" class="ip" name="C" ></h3></li>
-                       <li><h3>D = <input type="text" class="ip" name="D" ></h3></li>
+                       <li><h3>A = <input id="A" disabled="true" type="text" class="ip" name="A"></h3></li>
+                       <li><h3>B = <input id="B" disabled="true" type="text" class="ip" name="B" ></h3></li>
+                       <li><h3>C = <input id="C" disabled="true" type="text" class="ip" name="C" ></h3></li>
+                       <li><h3>D = <input id="D" disabled="true" type="text" class="ip" name="D" ></h3></li>
                    </ol> 
                     
                 </h3>
             </li>
         
             <li>
-                <h3>SENDING END VOLTAGE IN kV(NOMINAL PI) = <input type="text" class="ip" name="vnomi_s"></h3>
+                <h3>SENDING END VOLTAGE IN kV(AT NOMINAL VOLTAGE) = <input id="sending-end-voltage" disabled="true" type="text" class="ip" name="vnomi_s"></h3>
             </li>
             <li>
-                <h3>SENDING END CURRENT IN A =
-                    <input type="text" class="ip" name="i_s">
+                <h3>SENDING END CURRENT =
+                    <input id="sending-end-current" id="sending-end-current" disabled="true"  type="text" class="ip" name="i_s">
                 </h3>
             </li>
             <li>
-                <h3>% VOLTAGE REGULATION = <input type="text" class="ip" name="dia_strand"></h3>
+                <h3>% VOLTAGE REGULATION = <input id="voltage-regulation" disabled="true" type="text" class="ip" name="dia_strand"></h3>
             </li> 
             <li>
-                <h3>POWER LOSS IN THE LINE IN MW = <input type="text" class="ip" name="loss"></h3>
+                <h3>POWER LOSS IN THE LINE = <input id="power-loss" disabled="true" type="text" class="ip" name="loss"></h3>
             </li> 
             <li>
-                <h3>% TRANSMISSION EFFICIENCY = <input type="text" class="ip" name="trns_eff"></h3>
+                <h3>% TRANSMISSION EFFICIENCY = <input id="efficiency" disabled="true" type="text" class="ip" name="trns_eff"></h3>
             </li>
         </ol>
         <div id="download-div" class="center"><button id="download-button" class="calculate">SAVE OUTPUT TEXT</button></div>
         </div>
 
         <div id="receiving-circle-diagram">
-            <div class="center"><h2>Sample Receiving Circle Diagram</h2></div>
+            <div class="center"><h2>Receiving Circle Diagram</h2></div>
             <div id="canvas-container" class="center"></div>
         </div>
     </div>
