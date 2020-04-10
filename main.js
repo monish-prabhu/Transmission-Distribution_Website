@@ -144,8 +144,6 @@ function solve() {
         case LineModels.LONG:
             let gamma = ComplexNumber.sqrt(y.multiply(z));
             let zc = ComplexNumber.sqrt(z.divide(y));
-            console.log(gamma);
-            console.log(zc);
             A = ComplexNumber.cosh(gamma.multiplyScalar(lineLengthKm));
             B = ComplexNumber.sinh(gamma.multiplyScalar(lineLengthKm)).multiply(zc);
             C = ComplexNumber.sinh(gamma.multiplyScalar(lineLengthKm)).divide(zc);
@@ -171,7 +169,7 @@ function solve() {
     reg = (vs/A.abs - vr) / vr * 100;
     eff = pr / ps * 100;
 
-    console.log(`Recieving end: I = ${ir}, V = ${vr}, pf = ${pfr}, P = ${pr}; Sending end: V = ${vs}, I = ${is}, pf = ${pfs}, P = ${ps}`)
+    // console.log(`Recieving end: I = ${ir}, V = ${vr}, pf = ${pfr}, P = ${pr}; Sending end: V = ${vs}, I = ${is}, pf = ${pfs}, P = ${ps}`)
 
     answers = [
         new Answer('inductance', inductance * 1000, 'Inductance per phase per km in H/km', 'H/km'),
@@ -237,10 +235,10 @@ function submit(){
         setVariableValues();
         solve();
         setupDiagramValues();
-        canDraw = true;
         convertAllToEngMode();
         setAnswerElements();
         createDownloadFile();
+        canDraw = true;
         outputDiv.style.display = 'block';
     }
 }
