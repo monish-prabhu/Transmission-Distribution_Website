@@ -62,6 +62,11 @@ body{
 .container{
 	position: relative;	
 }
+
+#canvas-container{
+	margin-bottom: 20px;
+}
+
 #calculator{
 	width: 240px;
 	height: auto;

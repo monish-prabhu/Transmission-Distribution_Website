@@ -256,7 +256,12 @@ function setQuestionValues() {
                 flag = false;
                 break;
             }
-            let val = Number(inputText);
+            let val = Number(parseInput(inputText));
+            if (!val) {
+                alert(`Invalid input for ${questions[i].getQuestion()}`);
+                flag = false;
+                break;
+            }
             let unitElement = document.getElementById(`select-units-${i+1}`);
             if (unitElement && unitElement.options.length > 1) {             
                 val = convertToSiUnits(val, unitElement.selectedIndex);
@@ -619,4 +624,20 @@ function roundValueToThreeDecimals(x) {
 function positiveAngle(x) {
     if (x < 0) return x + 180;
     return x;
+}
+
+function parseInput(x) {
+    const regex = /([^0-9x\^.-])/g;
+    if (x.match(regex)) 
+        return NaN;
+    let terms = x.split('x10^');
+    let flag = true, ans = terms[0];
+    for (let i=1; i<terms.length; ++i) {
+        if (terms[i] == '' || !Number.parseFloat(terms[i])) {
+            flag = false;
+            break;
+        }
+        ans *= Math.pow(10, terms[i]);
+    }
+    return (flag ? ans : NaN);
 }
