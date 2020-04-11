@@ -54,7 +54,7 @@ body{
 	outline: none;
 	border-radius:10px ;
 }
-.center{
+.cent{
 	text-align: center;
 	width: 100%;
 	margin: auto;
@@ -153,7 +153,6 @@ input.ip{
 	  }
 #receiving-circle-diagram{
 	color: black;
-	font-size: large;
-	background-color: rgba(255, 255, 255, 0.623);
-
+	font-size: larger;
+	background-color: rgba(238, 238, 238, 0.815);
 }
