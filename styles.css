@@ -1,5 +1,5 @@
 body{
-    background-image: url("background.jpeg");
+    background-image: url("background2.png");
     background-size: cover;
     background-attachment: fixed;    
 }
@@ -23,25 +23,26 @@ body{
 
 }
 .input,.output{
-	background-color: rgba(255, 255, 255, 0.808);
+	background-color: rgba(5, 3, 3, 0.295);
     width: 75%;
-	font-family: monospace;
-	
+	font-family:monospace;
+	color: #fff;
     border:5px double ;
 	margin: auto;
 	
 	
 }
 
-
 .input{
+	position: relative;
 
 }
+
 .output{
 	display: none;
 }
 .box{
-    background: #010707 ;
+    background: #050505a2 ;
     color: #fff;
     padding: 5px;
     height: 30 5px;
@@ -60,7 +61,11 @@ body{
 }
 
 .container{
-	position: relative;	
+	position: fixed;
+	top: 300px;
+	right: 300px;
+
+	
 }
 
 #canvas-container{
@@ -73,11 +78,6 @@ body{
 	background-color: #eaedef;
 	margin-top: 20px;
 	bottom: 10px;
-	position: fixed;
-	right: 30px;
-	
-	
-	
 	border-radius: 5px;
 	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
@@ -110,36 +110,46 @@ input.operator:focus, .number:focus, .empty:focus{
 }
 
 .calculate {
+	font-family: monospace;
+	font-weight: bold;
 	position: relative;
 	padding: 5px 20px;
 	font-size: 24px;
 	text-align: center;
 	cursor: pointer;
 	outline: none;
-	color: #fff;
-	background-color: rgb(4, 3, 8);
-	border: 2px double black;
+	color: rgb(2, 2, 2);
+	background-color: rgba(255, 255, 255, 0.842);
+	border: 2px double rgba(0, 0, 0, 0.445);
 	border-radius: 15px;
-	box-shadow: 0 3px #999;
+	box-shadow: 0 3px rgb(185, 176, 176);
   }
   
-  .calculate:hover {background-color: #181717}
+  .calculate:hover {background-color: #858383}
   
   .calculate:active {
-	background-color: #272b4d;
-	box-shadow: 0 5px #666;
+	background-color: #47484b;
+	box-shadow: 0 5px rgb(243, 237, 237);
 	transform: translateY(4px);
   }
 input.ip{
-	  margin-left: 20px;
-	  background-color : rgba(163, 162, 162, 0.37);
-	  border: 4px double black;
+	  margin-left: 10px;
+	  color: aliceblue;
+	  font-size: medium;
+	  background-color : rgba(66, 65, 65, 0.37);
+	  border: 4px double rgb(235, 229, 229);
 	  border-radius:4px;
-	  transition: width 0.6s ease-in-out;  
+	  transition: width 0.4s ease-in-out;  
 	  width:150px;
 	  height: 25px;
 	  
 	}
 	input.ip:focus {
-		width: 300px;
+		width: 200px;
 	  }
+#receiving-circle-diagram{
+	color: black;
+	font-size: large;
+	background-color: rgba(255, 255, 255, 0.623);
+
+}
