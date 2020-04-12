@@ -239,6 +239,7 @@ function submit(){
         setAnswerElements();
         createDownloadFile();
         canDraw = true;
+        clear();
         outputDiv.style.display = 'block';
     }
 }
@@ -467,32 +468,44 @@ var questions = [
     new Question('Power factor of recieving end load')
 ];
 
-const w = 500, h = 500;
+const w = 500, h = 1000;
 var ba;
-var b2;
-const ox = w/2, oy = h/2;
-const maxL = 200;
-var scaleD;
-var r1, r2, r;
-const ar = 10, tr = 20, lrx = 15, lry = 20;
+var b2r, b2s;
+const orx = w/2, ory = h/6, osx = w/2, osy = 2*h/3;
+const maxLengthR = 250, maxLengthS = 270;
+var scaleR, scaleS;
+var rr1, rr2, rr, rs1, rs2, rs;
+const ar = 10, tr = 20, lrx = 15, lry = 15;
 const dash = 5;
+const axisLengthScaleY = 0.95, axisLengthScaleX = 0.95;
 const descScalar = 0.8, fracScalar = 3, numerWidth = 1.05;
 const axisStroke = 200;
 const strokeColor = 50;
-const textFill = 50, textStroke = 250;
-var cx, cy;
+const textFill = 50, textStroke = 245;
+var crx, cry, csx, csy;
+const dirs = { LEFT: 0, RIGHT: 1, TOP: 2, BOTTOM: 3 };
+const actions = { INCREASE: 0, DECREASE: 1 };
 
 function setupDiagramValues() {
-    r1 = A.abs * vr * vr / B.abs;
-    r2 = vr * ir;
-    scaleD = maxL / max(r1, r2);
-    r1 = r1 * scaleD;
-    r2 = r2 * scaleD;
+    rr1 = A.abs * vr * vr / B.abs;
+    rr2 = vr * ir;
+    rs1 = A.abs * vs * vs / B.abs;
+    rs2 = vs * is;
+    scaleR = maxLengthR / max(rr1, rr2);
+    scaleS = maxLengthR / max(rs1, rs2);
+    rr1 = rr1 * scaleR;
+    rr2 = rr2 * scaleR;
+    rs1 = rs1 * scaleS;
+    rs2 = rs2 * scaleS;
     ba = B.angle - A.angle;
-    cx = ox - r1 * Math.cos(ba);
-    cy = oy + r1 * Math.sin(ba);
-    r = distance(cx, cy, ox+r2*Math.cos(thetaR), oy-r2*Math.sin(thetaR));
-    b2 = angle(cx, cy, ox+r2*Math.cos(thetaR), oy-r2*Math.sin(thetaR));
+    crx = orx - rr1 * Math.cos(ba);
+    cry = ory + rr1 * Math.sin(ba);
+    csx = osx + rs1 * Math.cos(ba);
+    csy = osy + rs1 * Math.sin(ba);
+    rr = distance(crx, cry, orx+rr2*Math.cos(thetaR), ory-rr2*Math.sin(thetaR));
+    b2r = angle(crx, cry, orx+rr2*Math.cos(thetaR), ory-rr2*Math.sin(thetaR));
+    rs = distance(csx, csy, osx+rs2*Math.cos(thetaS), osy-rs2*Math.sin(-thetaS));
+    b2s = angle(csx, csy, osx+rs2*Math.cos(thetaS), osy+rs2*Math.sin(-thetaS));
 }
 
 function setup() {
@@ -503,23 +516,47 @@ function setup() {
 
 function draw() {
     if (canDraw) {
+        // Receiving End Diagram
         stroke(axisStroke);
-        line(ox, oy - h/1.8, ox, oy + h/1.8);
-        line(ox - w/1.8, oy, ox + w/1.8, oy);
+        line(orx, ory - h/6 * axisLengthScaleY, orx, ory + h/4 * axisLengthScaleY);
+        line(orx - w/2 * axisLengthScaleX, ory, orx + w/2 * axisLengthScaleX, ory);
         stroke(strokeColor);
         textSize(14);
+        drawLineText('Pᵣ', orx, ory, orx + w * axisLengthScaleX, ory, dirs.TOP, actions.DECREASE);
+        drawLineText('Qᵣ', orx, ory, orx, ory - h/3 * axisLengthScaleY, dirs.RIGHT, actions.DECREASE);
 
-        lineText(ox, oy, ox+r2*Math.cos(thetaR), oy-r2*Math.sin(thetaR), `|Vᵣ||Iᵣ| = ${convertToEngMode(vr*ir, 'VA')}`);
-        myArcText(ox, oy, 0, thetaR, `θᵣ = ${roundValue(degrees(thetaR))}°`);
+        lineText(orx, ory, orx+rr2*Math.cos(thetaR), ory-rr2*Math.sin(thetaR), `|Vᵣ||Iᵣ| = ${convertToEngMode(vr*ir, 'VA')}`);
+        myArcText(orx, ory, 0, thetaR, `θᵣ = ${roundValue(degrees(thetaR))}°`, RIGHT);
 
-        lineText(ox, oy, cx, cy, `|A||Vᵣ|²~|B|*= ${convertToEngMode(A.abs*vr*vr/B.abs, 'VA')}`, true, true);
-        myArcText(ox, oy, PI, PI+ba, `β-α \n=${roundValue(degrees(ba))}°`);
+        lineText(orx, ory, crx, cry, `|A||Vᵣ|²~|B|*= ${convertToEngMode(A.abs*vr*vr/B.abs, 'VA')}`, dirs.LEFT, actions.INCREASE);
+        myArcText(orx, ory, PI, PI+ba, `β-α \n=${roundValue(degrees(ba))}°`, LEFT, BOTTOM);
 
-        lineText(cx, cy, ox+r2*Math.cos(thetaR), oy-r2*Math.sin(thetaR), `|Vᵣ||Vₛ|~|B| *= ${convertToEngMode(r/scaleD, 'VA')}`, true);
-        myArc(cx, cy, r, b2-PI/4, b2+PI/4);
+        lineText(crx, cry, orx+rr2*Math.cos(thetaR), ory-rr2*Math.sin(thetaR), `|Vᵣ||Vₛ|~|B| *= ${convertToEngMode(rr/scaleR, 'VA')}`, dirs.RIGHT, actions.DECREASE);
+        myArc(crx, cry, rr, b2r-PI/4, b2r+PI/4);
 
-        dottedLine(cx, cy, cx + r, cy);
-        myArcText(cx, cy, 0, b2, `β-δ = ${roundValue(degrees(b2))}°`);
+        dottedLine(crx, cry, crx + rr, cry);
+        myArcText(crx, cry, 0, b2r, `β-δ = ${roundValue(degrees(b2r))}°`, RIGHT);
+
+        // Sending End Diagram
+        stroke(axisStroke);
+        line(osx, osy - h/6 * axisLengthScaleY, osx, osy + h/4 * axisLengthScaleY);
+        line(osx - w/2 * axisLengthScaleX, osy, osx + w/2 * axisLengthScaleX, osy);
+        stroke(strokeColor);
+        textSize(14);
+        drawLineText('Pₛ', osx, osy, osx + w * axisLengthScaleX, osy, dirs.TOP, actions.DECREASE);
+        drawLineText('Qₛ', osx, osy, osx, osy - h/3 * axisLengthScaleY, dirs.RIGHT, actions.DECREASE);
+        
+        lineText(osx, osy, osx+rs2*Math.cos(thetaS), osy+rs2*Math.sin(-thetaS), `|Vₛ||Iₛ| = ${convertToEngMode(vs*is, 'VA')}`, dirs.RIGHT);
+        myArcText(osx, osy, PI*2+thetaS, 0, `θₛ = ${roundValue(degrees(thetaS))}°`, RIGHT, TOP);
+        
+        lineText(osx, osy, csx, csy, `|A||Vₛ|²~|B|*= ${convertToEngMode(A.abs*vs*vs/B.abs, 'VA')}`, dirs.LEFT, actions.INCREASE);
+        myArcText(csx, csy, PI-ba, PI, `β-α = ${roundValue(degrees(ba))}°`, LEFT);
+        
+        lineText(csx, csy, osx+rs2*Math.cos(thetaS), osy+rs2*Math.sin(-thetaS), `|Vᵣ||Vₛ|~|B| *= ${convertToEngMode(rs/scaleS, 'VA')}`, dirs.RIGHT, actions.DECREASE);
+        myArc(csx, csy, rs, b2s-PI/4, b2s+PI/4);
+        
+        dottedLine(csx - rs/2, csy, csx + rs/2, csy);
+        myArcText(csx, csy, 0, b2s, `180°-(β+δ) = ${roundValue(degrees(PI-b2s))}°`, RIGHT);
     }
 }
 
@@ -529,32 +566,36 @@ function myArc(x, y, r, a1, a2) {
     arc(x, y, 2*r, 2*r, 2*PI-a2, 2*PI-a1);
 }
 
-function myArcText(x, y, a1, a2, st) {
-    myArc(x, y, ar, a1, a2);
-    drawArcText(st, x, y, a1+(a2-a1)/2);
-}
-
-function drawArcText(st,x,y,ang) {
+function myArcText(x, y, a1, a2, st, dir1, dir2) {
+    let r = ar;
+    myArc(x, y, r, a1, a2);
+    drawArcText(st, x, y, a1, a2, dir1, dir2);
+  }
+  
+  function drawArcText(st,x,y,a1,a2,dir1, dir2) {
     fill(textFill);
     stroke(textStroke);
-    textAlign(CENTER, CENTER);
-
-    text(st,x+(ar+tr)*Math.cos(ang),y-(ar+tr)*Math.sin(ang));
+    textAlign(invertDir(dir1), invertDir(dir2));
+    
+    x=x+(ar+tr)*(Math.cos(a1)+Math.cos(a2))/2;
+    y=y-(ar+tr)*(Math.sin(a1)+Math.sin(a2))/2;
+    
+    text(st,x,y);
     stroke(strokeColor);
-
+    
     noFill();
-}
+  }
 
-function drawLineText(st, x1, y1, x2, y2, reverse, reduceSpace) {
+function drawLineText(st, x1, y1, x2, y2, dir, extSpaceAction, intSpaceAction) {
     fill(textFill);
     stroke(textStroke);
     textAlign(CENTER, CENTER);
 
-    let ang = angle(x1,y1,x2,y2) + (reverse ? -1 : 1)*PI/2;
     let i1 = st.indexOf('~');
     i1 = (i1 !== -1 ? i1 : st.length);
     let num1 = st.slice(0,i1);
     let tw1 = textWidth(num1);
+    let asc = textAscent() * descScalar * fracScalar;
     let desc = textDescent() * descScalar * fracScalar;
     let i2 = st.indexOf('*');
     i2 = (i2 !== -1 ? i2 : st.length);
@@ -562,29 +603,51 @@ function drawLineText(st, x1, y1, x2, y2, reverse, reduceSpace) {
     let num2 = st.slice(i2+1,st.length);
     let tw2 = textWidth(num2);
     // cx = cx - (tw1+tw2)/4;
-    let cx = (x1+x2)/2+(lrx+(tw1+tw2)/2)*Math.cos(ang), cy
-    if (i1 !== st.length) cy = (y1+y2)/2-(lry+2*desc)*Math.sin(ang);
-    else cy = (y1+y2)/2-lry*Math.sin(ang);
-    let cx2;
-    if (reduceSpace) cx2 = cx+(tw1+tw2)/2;
-    else cx2 = cx+(tw1+tw2)/2*numerWidth;
-
-    if (i1 === st.length) {
-        text(st,cx,cy);
-    } else {
-        text(num1,cx,cy);
-        text('―',cx,cy+desc);  
-        text(den,cx,cy+2*desc);
-        text(num2,cx2,cy+desc);
-
-        stroke(strokeColor);
-        noFill();
+    let cx=(x1+x2)/2, cy=(y1+y2)/2;
+    switch(dir){
+      case dirs.LEFT: 
+      default:
+        cx -= (tw1+tw2)/2 + lrx;
+        if (extSpaceAction == actions.INCREASE) cx -= lrx/2;
+        else if (extSpaceAction == actions.DECREASE) cx += lrx/2;
+        break;
+      case dirs.RIGHT:
+        cx += (tw1+tw2)/2 + lrx;
+        if (extSpaceAction == actions.INCREASE) cx += lrx/2;
+        else if (extSpaceAction == actions.DECREASE) cx -= lrx/2;
+        break;
+      case dirs.TOP:
+        cy -= desc + lry;
+        if (extSpaceAction == actions.INCREASE) cy -= desc/2;
+        else if (extSpaceAction == actions.DECREASE) cy += desc/2;
+        break;
+      case dirs.BOTTOM:
+        cy += asc + lry;
+        if (extSpaceAction == actions.INCREASE) cy += desc/2;
+        else if (extSpaceAction == actions.DECREASE) cy -= desc/2;
+        break;
     }
-}
+    
+    if (i1 !== st.length) cy -= 2*desc;
+    
+    if (i1 === st.length) {
+      text(st,cx,cy);
+    } else {
+      let cx1=cx-tw1/2,cx2=cx+tw2/2;
+      text(num1,cx1,cy);
+      text('―',cx1,cy+desc);  
+      text(den,cx1,cy+2*desc);
+      text(num2,cx2,cy+desc);
+    }
+    
+      stroke(strokeColor);
+      noFill();
+  }
 
-function lineText(x1, y1, x2, y2, st, reverse, reduceSpace) {
+  
+function lineText(x1, y1, x2, y2, st, dir, extSpaceAction, intSpaceAction) {
     line(x1, y1, x2, y2);
-    drawLineText(st, x1, y1, x2, y2, reverse, reduceSpace);
+    drawLineText(st, x1, y1, x2, y2, dir, extSpaceAction, intSpaceAction);
 }
 
 function dottedLine(x1, y1, x2, y2) {
@@ -613,12 +676,26 @@ function angle(x1, y1, x2, y2) {
     return t;
 }
 
+function invertDir(dir) {
+    switch(dir) {
+      case LEFT: return RIGHT;
+      case RIGHT: return LEFT;
+      case TOP: return BOTTOM;
+      case BOTTOM: return TOP;
+    }
+    return CENTER;
+  }
+
 function roundValue(x) {
     return (x).toFixed(2).replace(/[.,]00$/, "");
 }
 
 function roundValueToThreeDecimals(x) {
     return (x).toFixed(3).replace(/[.,]000$/, "");
+}
+
+function roundValueToOneDecimal(x) {
+    return (x).toFixed(1).replace(/[.,]000$/, "");
 }
 
 function positiveAngle(x) {

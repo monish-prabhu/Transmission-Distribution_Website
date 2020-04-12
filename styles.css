@@ -43,7 +43,7 @@ body{
 	display: none;
 }
 .box{
-    background: #050505a2 ;
+    background: rgb(140, 140, 140);
     color: #fff;
     padding: 5px;
     height: 30 5px;
@@ -60,19 +60,15 @@ body{
 	margin: auto;
 	padding: 15px 0px;
 }
-@media only screen and (max-width: 1700px){
+@media only screen and (max-width: 1200px){
 .container{
 	display: none;
 }
 }
 .container{
 	position: fixed;
-	top: 300px;
-	right: 300px;
-}
-
-#canvas-container{
-	margin-bottom: 20px;
+	bottom: 15px;
+	right: 25px;
 }
 
 #calculator{
@@ -154,6 +150,6 @@ input.ip{
 #receiving-circle-diagram{
 	color: black;
 	font-size: large;
-	background-color: rgba(255, 255, 255, 0.623);
+	background-color: rgba(255, 255, 255, 0.95);
 
 }
