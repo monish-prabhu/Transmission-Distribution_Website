@@ -35,6 +35,130 @@ var A, B, C, D, delta;
 var answers;
 var canvas, canDraw = false;
 
+window.onload = () => {
+    downloadA = document.createElement('a');
+    outputDiv = document.getElementById('output-div');
+    downloadDiv = document.getElementById('download-div');
+    downloadButton = document.getElementById('download-button');
+    window.URL = window.webkitURL || window.URL;
+}
+
+function solve() {
+    diameterSubconductor = getDiameterSubconductor(strands, diameterStrand);
+    inductance = getInductance();
+    capacitance = getCapacitance();
+    resistance = resistancePerKm * lineLengthKm;
+    xl = 2 * PI * frequency * inductance * lineLength;
+    xc = 1 / (2 * PI * frequency * capacitance * lineLength);
+    // console.log(`L = ${inductance}, C = ${capacitance}, XL = ${xl}, XC = ${xc}, lineLengthKm = ${lineLengthKm}`);
+    vr /= Math.sqrt(3); // Phase Voltage
+    ir = pr / (3 * vr * pfr);
+    thetaR = Math.acos(pfr);
+    let z = new ComplexNumber(resistancePerKm, xl/(lineLengthKm));
+    let y = new ComplexNumber(0, (1/xc)/lineLengthKm);
+    let Z = new ComplexNumber(resistance, xl), Y = new ComplexNumber(0, 1/xc);
+    // console.log(`z = ${z.rectForm()}, y = ${y.polarForm()}, Z = ${Z.rectForm()}, Y = ${Y.polarForm()}`)
+    switch(lineModel) {
+        case LineModels.SHORT: // A = 1, B = Z, C = 0, D = 1
+            A = new ComplexNumber(1,0);
+            B = Z.copy();
+            C = new ComplexNumber(0,0);
+            break;
+        case LineModels.NOMINAL_PI: // A = 1 + YZ/2, B = Z, C = Y + Y^2*Z/4, D = 1 + YZ/2
+            A = Z.multiply(Y).multiplyScalar(1/2).addScalar(1);
+            B = Z.copy();
+            C = Y.add(Z.multiply(Y).multiply(Y).multiplyScalar(1/4));
+            break;
+        case LineModels.LONG:
+            let gamma = ComplexNumber.sqrt(y.multiply(z));
+            let zc = ComplexNumber.sqrt(z.divide(y));
+            A = ComplexNumber.cosh(gamma.multiplyScalar(lineLengthKm));
+            B = ComplexNumber.sinh(gamma.multiplyScalar(lineLengthKm)).multiply(zc);
+            C = ComplexNumber.sinh(gamma.multiplyScalar(lineLengthKm)).divide(zc);
+            break;
+    }
+    D = A.copy();
+
+    let irComplex = new ComplexNumber(ir, -thetaR);
+    let vsComplex = A.multiplyScalar(vr).add(B.multiply(irComplex));
+    let isComplex = C.multiplyScalar(vr).add(D.multiply(irComplex));
+    vs = vsComplex.abs;
+    is = isComplex.abs;
+    thetaS = isComplex.angle - vsComplex.angle;
+    pfs = Math.cos(thetaS);
+    ps = 3 * vs * is;
+
+    if (lineModel == LineModels.SHORT) {
+        chargingCurrent = 0;
+    } else {
+        chargingCurrent = vr * C.abs;
+    }
+    
+    reg = (vs/A.abs - vr) / vr * 100;
+    eff = pr / ps * 100;
+
+    // console.log(`Recieving end: I = ${ir}, V = ${vr}, pf = ${pfr}, P = ${pr}; Sending end: V = ${vs}, I = ${is}, pf = ${pfs}, P = ${ps}`)
+
+    answers = [
+        new Answer('inductance', inductance * 1000, 'Inductance per phase per km in H/km', 'H/km'),
+        new Answer('capacitance', capacitance * 1000, 'Capacitance per phase per km in F/km', 'F/km'),
+        new Answer('inductive-reactance', xl, 'Inductive reactance of the line in Ohm', 'Ω'),
+        new Answer('capacitive-reactance', xc, 'Capacitive reactance of the line in Ohm', 'Ω'),
+        new Answer('charging-current', chargingCurrent, 'Charging current drawn from the sending end substation', 'A'),
+        new Answer('A', A, 'A', '', 0, true),
+        new Answer('B', B, 'B', 'Ω', 0, true),
+        new Answer('C', C, 'C', '℧', 0, true),
+        new Answer('D', D, 'D', '', 0, true),
+        new Answer('sending-end-voltage', vs * Math.sqrt(3), 'Sending end voltage, if the receiving end voltage is maintained at nominal system voltage', 'V', 3),
+        new Answer('sending-end-current', is, 'Sending end current', 'A'),
+        new Answer('voltage-regulation', reg, 'Percentage voltage regulation', '%', 0, false, true),
+        new Answer('power-loss', (ps-pr), 'Power loss int the line', 'W', 6),
+        new Answer('efficiency', eff, 'Transmission efficiency', '%', 0, false, true)
+    ] 
+}
+
+function sgmd(n, d) {
+    let theta = 2*PI/n;
+    if (n <= 1) return 1;
+    let dr = d / (2*sin(theta/2));
+    let ans = 1;
+    for (let i = 1; i < n; ++i) {
+        ans *= Math.pow(distance(dr, 0, dr*Math.cos(i*theta), dr*Math.sin(i*theta)), 1/n);
+    }
+    return ans;
+}
+
+function sgmdC(n, distance, radius) {
+    return sgmd(n, distance) * Math.pow(radius, 1/n);
+}
+
+function sgmdL(n, distance, radius) {
+    return sgmd(n, distance) * Math.pow(radius * GMR_L, 1/n);
+}
+
+function getDiameterSubconductor(strands, diameter) {
+    let n = 1;
+    while ((3*n*n - 3*n + 1) < strands) {
+        ++n;
+    }
+    return (2*n - 1) * diameter;
+}
+
+function getInductance() {
+    let mg = distanceConductor;
+    let sg = sgmdL(subconductorsPerConductor, distanceSubconductor, diameterSubconductor/2);
+    // console.log(`Inductance: SGMD = ${sg}, MGMD = ${mg}`);
+    return 2 * Math.pow(10, -7) * Math.log10(mg / sg) / Math.LOG10E;
+}
+
+function getCapacitance() {
+    let mg = distanceConductor;
+    let sg = sgmdC(subconductorsPerConductor, distanceSubconductor, diameterSubconductor/2);
+    // console.log(`Capacitance: SGMD = ${sg}, MGMD = ${mg}`);
+    return 2 * PI * EPLISON / Math.log10(mg / sg) * Math.LOG10E;
+}
+
+
 class ComplexNumber {
     constructor(a, b, mode) {
         if (mode == ComplexMode.POLAR) { 
@@ -104,130 +228,6 @@ class ComplexNumber {
         let a = c.real, b = c.imaginary;
         return new ComplexNumber(Math.cos(b) * Math.sinh(a), Math.sin(b) * Math.cosh(a));
     }
-}
-
-window.onload = () => {
-    // console.log(`Questions: ${JSON.stringify(questions)}`);
-    downloadA = document.createElement('a');
-    outputDiv = document.getElementById('output-div');
-    downloadDiv = document.getElementById('download-div');
-    downloadButton = document.getElementById('download-button');
-    window.URL = window.webkitURL || window.URL;
-}
-
-function solve() {
-    diameterSubconductor = getDiameterSubconductor(strands, diameterStrand);
-    inductance = getInductance();
-    capacitance = getCapacitance();
-    resistance = resistancePerKm * lineLengthKm;
-    xl = 2 * PI * frequency * inductance * lineLength;
-    xc = 1 / (2 * PI * frequency * capacitance * lineLength);
-    console.log(`L = ${inductance}, C = ${capacitance}, XL = ${xl}, XC = ${xc}, lineLengthKm = ${lineLengthKm}`);
-    vr /= Math.sqrt(3); // Phase Voltage
-    ir = pr / (3 * vr * pfr);
-    thetaR = Math.acos(pfr);
-    let z = new ComplexNumber(resistancePerKm, xl/(lineLengthKm));
-    let y = new ComplexNumber(0, (1/xc)/lineLengthKm);
-    let Z = new ComplexNumber(resistance, xl), Y = new ComplexNumber(0, 1/xc);
-    console.log(`z = ${z.rectForm()}, y = ${y.polarForm()}, Z = ${Z.rectForm()}, Y = ${Y.polarForm()}`)
-    switch(lineModel) {
-        case LineModels.SHORT: // A = 1, B = Z, C = 0, D = 1
-            A = new ComplexNumber(1,0);
-            B = Z.copy();
-            C = new ComplexNumber(0,0);
-            break;
-        case LineModels.NOMINAL_PI: // A = 1 + YZ/2, B = Z, C = Y + Y^2*Z/4, D = 1 + YZ/2
-            A = Z.multiply(Y).multiplyScalar(1/2).addScalar(1);
-            B = Z.copy();
-            C = Y.add(Z.multiply(Y).multiply(Y).multiplyScalar(1/4));
-            break;
-        case LineModels.LONG:
-            let gamma = ComplexNumber.sqrt(y.multiply(z));
-            let zc = ComplexNumber.sqrt(z.divide(y));
-            A = ComplexNumber.cosh(gamma.multiplyScalar(lineLengthKm));
-            B = ComplexNumber.sinh(gamma.multiplyScalar(lineLengthKm)).multiply(zc);
-            C = ComplexNumber.sinh(gamma.multiplyScalar(lineLengthKm)).divide(zc);
-            break;
-    }
-    D = A.copy();
-
-    let irComplex = new ComplexNumber(ir, -thetaR);
-    let vsComplex = A.multiplyScalar(vr).add(B.multiply(irComplex));
-    let isComplex = C.multiplyScalar(vr).add(D.multiply(irComplex));
-    vs = vsComplex.abs;
-    is = isComplex.abs;
-    thetaS = isComplex.angle - vsComplex.angle;
-    pfs = Math.cos(thetaS);
-    ps = 3 * vs * is;
-
-    if (lineModel == LineModels.SHORT) {
-        chargingCurrent = 0;
-    } else {
-        chargingCurrent = vs * Y.abs;
-    }
-    
-    reg = (vs/A.abs - vr) / vr * 100;
-    eff = pr / ps * 100;
-
-    // console.log(`Recieving end: I = ${ir}, V = ${vr}, pf = ${pfr}, P = ${pr}; Sending end: V = ${vs}, I = ${is}, pf = ${pfs}, P = ${ps}`)
-
-    answers = [
-        new Answer('inductance', inductance * 1000, 'Inductance per phase per km in H/km', 'H/km'),
-        new Answer('capacitance', capacitance * 1000, 'Capacitance per phase per km in F/km', 'F/km'),
-        new Answer('inductive-reactance', xl, 'Inductive reactance of the line in Ohm', 'Ω'),
-        new Answer('capacitive-reactance', xc, 'Capacitive reactance of the line in Ohm', 'Ω'),
-        new Answer('charging-current', chargingCurrent, 'Charging current drawn from the sending end substation', 'A'),
-        new Answer('A', A, 'A', '', 0, true),
-        new Answer('B', B, 'B', 'Ω', 0, true),
-        new Answer('C', C, 'C', '℧', 0, true),
-        new Answer('D', D, 'D', '', 0, true),
-        new Answer('sending-end-voltage', vs * Math.sqrt(3), 'Sending end voltage, if the receiving end voltage is maintained at nominal system voltage', 'V', 3),
-        new Answer('sending-end-current', is, 'Sending end current', 'A'),
-        new Answer('voltage-regulation', reg, 'Percentage voltage regulation', '%', 0, false, true),
-        new Answer('power-loss', (ps-pr), 'Power loss int the line', 'W', 6),
-        new Answer('efficiency', eff, 'Transmission efficiency', '%', 0, false, true)
-    ] 
-}
-
-function sgmd(n, d) {
-    let theta = 2*PI/n;
-    if (n <= 1) return 1;
-    let dr = d / (2*sin(theta/2));
-    let ans = 1;
-    for (let i = 1; i < n; ++i) {
-        ans *= Math.pow(distance(dr, 0, dr*Math.cos(i*theta), dr*Math.sin(i*theta)), 1/n);
-    }
-    return ans;
-}
-
-function sgmdC(n, distance, radius) {
-    return sgmd(n, distance) * Math.pow(radius, 1/n);
-}
-
-function sgmdL(n, distance, radius) {
-    return sgmd(n, distance) * Math.pow(radius * GMR_L, 1/n);
-}
-
-function getDiameterSubconductor(strands, diameter) {
-    let n = 1;
-    while ((3*n*n - 3*n + 1) < strands) {
-        ++n;
-    }
-    return (2*n - 1) * diameter;
-}
-
-function getInductance() {
-    let mg = distanceConductor;
-    let sg = sgmdL(subconductorsPerConductor, distanceSubconductor, diameterSubconductor/2);
-    // console.log(`Inductance: SGMD = ${sg}, MGMD = ${mg}`);
-    return 2 * Math.pow(10, -7) * Math.log10(mg / sg) / Math.LOG10E;
-}
-
-function getCapacitance() {
-    let mg = distanceConductor;
-    let sg = sgmdC(subconductorsPerConductor, distanceSubconductor, diameterSubconductor/2);
-    // console.log(`Capacitance: SGMD = ${sg}, MGMD = ${mg}`);
-    return 2 * PI * EPLISON / Math.log10(mg / sg) * Math.LOG10E;
 }
 
 function submit(){   
@@ -396,6 +396,27 @@ function createDownloadFile() {
     downloadDiv.appendChild(downloadA);
 }
 
+function positiveAngle(x) {
+    if (x < 0) return x + 180;
+    return x;
+}
+
+function parseInput(x) {
+    const regex = /([^0-9x\^.-])/g;
+    if (x.match(regex)) 
+        return NaN;
+    let terms = x.split('x10^');
+    let flag = true, ans = terms[0];
+    for (let i=1; i<terms.length; ++i) {
+        if (terms[i] == '' || !Number.parseFloat(terms[i])) {
+            flag = false;
+            break;
+        }
+        ans *= Math.pow(10, terms[i]);
+    }
+    return (flag ? ans : NaN);
+}
+
 class Question {
     constructor(question, unit, defaultPrefix, isInteger, responseOptions, response) {
         this._question = question;
@@ -556,7 +577,7 @@ function draw() {
         myArc(csx, csy, rs, b2s-PI/4, b2s+PI/4);
         
         dottedLine(csx - rs/2, csy, csx + rs/2, csy);
-        myArcText(csx, csy, 0, b2s, `180°-(β+δ) = ${roundValue(degrees(PI-b2s))}°`, RIGHT);
+        myArcText(csx, csy, 0, b2s, `180°-(β+δ) = ${roundValue(degrees(b2s))}°`, RIGHT);
     }
 }
 
@@ -570,21 +591,21 @@ function myArcText(x, y, a1, a2, st, dir1, dir2) {
     let r = ar;
     myArc(x, y, r, a1, a2);
     drawArcText(st, x, y, a1, a2, dir1, dir2);
-  }
+}
   
   function drawArcText(st,x,y,a1,a2,dir1, dir2) {
     fill(textFill);
     stroke(textStroke);
     textAlign(invertDir(dir1), invertDir(dir2));
-    
+
     x=x+(ar+tr)*(Math.cos(a1)+Math.cos(a2))/2;
     y=y-(ar+tr)*(Math.sin(a1)+Math.sin(a2))/2;
-    
+
     text(st,x,y);
     stroke(strokeColor);
-    
+
     noFill();
-  }
+}
 
 function drawLineText(st, x1, y1, x2, y2, dir, extSpaceAction, intSpaceAction) {
     fill(textFill);
@@ -605,43 +626,43 @@ function drawLineText(st, x1, y1, x2, y2, dir, extSpaceAction, intSpaceAction) {
     // cx = cx - (tw1+tw2)/4;
     let cx=(x1+x2)/2, cy=(y1+y2)/2;
     switch(dir){
-      case dirs.LEFT: 
-      default:
-        cx -= (tw1+tw2)/2 + lrx;
-        if (extSpaceAction == actions.INCREASE) cx -= lrx/2;
-        else if (extSpaceAction == actions.DECREASE) cx += lrx/2;
-        break;
-      case dirs.RIGHT:
-        cx += (tw1+tw2)/2 + lrx;
-        if (extSpaceAction == actions.INCREASE) cx += lrx/2;
-        else if (extSpaceAction == actions.DECREASE) cx -= lrx/2;
-        break;
-      case dirs.TOP:
-        cy -= desc + lry;
-        if (extSpaceAction == actions.INCREASE) cy -= desc/2;
-        else if (extSpaceAction == actions.DECREASE) cy += desc/2;
-        break;
-      case dirs.BOTTOM:
-        cy += asc + lry;
-        if (extSpaceAction == actions.INCREASE) cy += desc/2;
-        else if (extSpaceAction == actions.DECREASE) cy -= desc/2;
-        break;
+        case dirs.LEFT: 
+        default:
+            cx -= (tw1+tw2)/2 + lrx;
+            if (extSpaceAction == actions.INCREASE) cx -= lrx/2;
+            else if (extSpaceAction == actions.DECREASE) cx += lrx/2;
+            break;
+        case dirs.RIGHT:
+            cx += (tw1+tw2)/2 + lrx;
+            if (extSpaceAction == actions.INCREASE) cx += lrx/2;
+            else if (extSpaceAction == actions.DECREASE) cx -= lrx/2;
+            break;
+        case dirs.TOP:
+            cy -= desc + lry;
+            if (extSpaceAction == actions.INCREASE) cy -= desc/2;
+            else if (extSpaceAction == actions.DECREASE) cy += desc/2;
+            break;
+        case dirs.BOTTOM:
+            cy += asc + lry;
+            if (extSpaceAction == actions.INCREASE) cy += desc/2;
+            else if (extSpaceAction == actions.DECREASE) cy -= desc/2;
+            break;
     }
     
     if (i1 !== st.length) cy -= 2*desc;
     
     if (i1 === st.length) {
-      text(st,cx,cy);
+        text(st,cx,cy);
     } else {
-      let cx1=cx-tw1/2,cx2=cx+tw2/2;
-      text(num1,cx1,cy);
-      text('―',cx1,cy+desc);  
-      text(den,cx1,cy+2*desc);
-      text(num2,cx2,cy+desc);
+        let cx1=cx-tw1/2,cx2=cx+tw2/2;
+        text(num1,cx1,cy);
+        text('―',cx1,cy+desc);  
+        text(den,cx1,cy+2*desc);
+        text(num2,cx2,cy+desc);
     }
     
-      stroke(strokeColor);
-      noFill();
+    stroke(strokeColor);
+    noFill();
   }
 
   
@@ -678,10 +699,10 @@ function angle(x1, y1, x2, y2) {
 
 function invertDir(dir) {
     switch(dir) {
-      case LEFT: return RIGHT;
-      case RIGHT: return LEFT;
-      case TOP: return BOTTOM;
-      case BOTTOM: return TOP;
+        case LEFT: return RIGHT;
+        case RIGHT: return LEFT;
+        case TOP: return BOTTOM;
+        case BOTTOM: return TOP;
     }
     return CENTER;
   }
@@ -696,25 +717,4 @@ function roundValueToThreeDecimals(x) {
 
 function roundValueToOneDecimal(x) {
     return (x).toFixed(1).replace(/[.,]000$/, "");
-}
-
-function positiveAngle(x) {
-    if (x < 0) return x + 180;
-    return x;
-}
-
-function parseInput(x) {
-    const regex = /([^0-9x\^.-])/g;
-    if (x.match(regex)) 
-        return NaN;
-    let terms = x.split('x10^');
-    let flag = true, ans = terms[0];
-    for (let i=1; i<terms.length; ++i) {
-        if (terms[i] == '' || !Number.parseFloat(terms[i])) {
-            flag = false;
-            break;
-        }
-        ans *= Math.pow(10, terms[i]);
-    }
-    return (flag ? ans : NaN);
 }
