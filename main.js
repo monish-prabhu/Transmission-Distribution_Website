@@ -79,14 +79,14 @@ function solve() {
     }
     D = A.copy();
 
-    let irComplex = new ComplexNumber(ir, -thetaR);
+    let irComplex = new ComplexNumber(ir, -thetaR, ComplexMode.POLAR);
     let vsComplex = A.multiplyScalar(vr).add(B.multiply(irComplex));
     let isComplex = C.multiplyScalar(vr).add(D.multiply(irComplex));
     vs = vsComplex.abs;
     is = isComplex.abs;
     thetaS = isComplex.angle - vsComplex.angle;
     pfs = Math.cos(thetaS);
-    ps = 3 * vs * is;
+    ps = 3 * vs * is * pfs;
 
     if (lineModel == LineModels.SHORT) {
         chargingCurrent = 0;
