@@ -190,6 +190,23 @@ input.operator:focus, .number:focus, .empty:focus{
 	box-shadow: 0 5px rgb(243, 237, 237);
 	transform: translateY(4px);
   }
+
+#circle-diagram .calculate {
+	margin-top: 5px;	
+	color: rgb(252, 252, 252);
+	background-color: rgba(35, 35, 35, 0.9);
+	border: 2px double rgba(200, 200, 200, 0.445);
+	box-shadow: 0 3px rgb(205, 196, 196);
+}
+
+#circle-diagram .calculate:hover {
+	background-color: rgb(73, 71, 71, 0.65)
+}
+
+#circle-diagram .calculate:active {
+	background-color: #47484b;
+	box-shadow: 0 5px rgb(243, 237, 237);
+}
 input.ip{
 	  margin-left: 10px;
 	  color: aliceblue;
@@ -205,9 +222,9 @@ input.ip{
 	input.ip:focus {
 		width: 200px;
 	  }
-#receiving-circle-diagram{
+#circle-diagram{
 	color: black;
 	font-size: large;
-	background-color: rgba(255, 255, 255, 0.95);
-
+	background-color: rgba(255, 255, 255);
+	padding-bottom: 10px;
 }
