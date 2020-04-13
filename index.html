@@ -21,6 +21,23 @@
         {   var value = document.getElementById(foc).value;
             document.getElementById(foc).value = value.substr(0, value.length - 1);
         }
+        function SorUs(val){
+                if(val){
+                opt = document.getElementById("Symm").value;
+                if(val.value==opt)
+                {
+                    document.getElementById("sym").style.display="block";
+                    document.getElementById("Usym").style.display="none";
+
+                }
+                else{
+                    document.getElementById("Usym").style.display="block";
+                    document.getElementById("sym").style.display="none";
+
+                }}
+            
+
+        }
         
     </script>
     
@@ -50,13 +67,25 @@
                   
                 <li>
                     <h3>TYPE OF SYSTEM:
-                    <select id="select-value-1" name="TYPE OF SYSTEM" class="box" >
-                        <option value="Symm">Symmetrical spacing</option>
-                        <option value="UnSymm">UnSymmetrical spacing</option>
+                    <select id="select-value-1" name="TYPE OF SYSTEM" class="box" onchange="SorUs(this)" >
+                        <option value="Symm" id="Symm">Symmetrical spacing</option>
+                        <option id="UnSym" value="UnSymm" >UnSymmetrical spacing</option>
                     </select>
                     </h3>
                 </li>
-                <li>
+                <li id="Usym" style="display: none;"><h3>SPACING BETWEEN THE PHASE CONDUCTORS:<select id="select-units-2" name="units" class="box">
+                    <option value="m">in m</option>
+                    <option value="mm">in mm</option>
+                    <option value="ft">in ft</option>
+                    <option value="inch">in inch</option>
+                    </select></h3>
+                    <ul>
+                        <li><h3>Dab:<input id="Dab" type="text" class="ip" type="text" name="numInp" onfocus='foc="Dab"' step="0.01"></h3></li>
+                        <li><h3>Dbc:<input id="Dbc" type="text" class="ip" type="text" name="numInp" onfocus='foc="Dbc"' step="0.01"></h3></li>
+                        <li><h3>Dca:<input id="Dcb" type="text" class="ip" type="text" name="numInp" onfocus='foc="Dca"' step="0.01"></h3></li>
+                    </ul>
+                </li>
+                <li id="sym">
                     <h3>SPACING BETWEEN THE PHASE CONDUCTORS:
                         <input id="input-value-2" class="ip" type="text" name="numInp" onfocus='foc="input-value-2"' step="0.01"> 
                         <select id="select-units-2" name="units" class="box">
