@@ -1,5 +1,3 @@
-var downloadA;
-var outputDiv, downloadDiv, downloadButton;
 const LineModels = {
     SHORT: 0,
     NOMINAL_PI: 1,
@@ -33,7 +31,9 @@ var chargingCurrent;
 var reg, eff;
 var A, B, C, D, delta;
 var answers;
-var canvas, canDraw = false;
+var canvas, canDraw = false, drawBackground = false, downloadTimer;
+var downloadA;
+var outputDiv, downloadDiv, downloadButton;
 
 window.onload = () => {
     downloadA = document.createElement('a');
@@ -396,6 +396,10 @@ function createDownloadFile() {
     downloadDiv.appendChild(downloadA);
 }
 
+function saveCircleDiagram() {
+    saveCanvas(canvas, 'circle-diagram.png');
+}
+
 function positiveAngle(x) {
     if (x < 0) return x + 180;
     return x;
@@ -537,6 +541,8 @@ function setup() {
 
 function draw() {
     if (canDraw) {
+        background(255, 255, 255);
+        
         // Receiving End Diagram
         stroke(axisStroke);
         line(orx, ory - h/6 * axisLengthScaleY, orx, ory + h/4 * axisLengthScaleY);
