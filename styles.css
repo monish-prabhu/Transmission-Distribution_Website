@@ -43,7 +43,7 @@ ul.nav li a:hover{
 	color: #fff;
 } 
 
-@media(max-width:885px)
+@media(max-width:985px)
 {
 	header{
 		padding: 0 0;
@@ -61,6 +61,18 @@ ul.nav li a:hover{
 		text-align: center;
 		color: #fff;
 		background: rgba(0, 0, 0, 0.247);
+	}
+	.input {
+		width: 95% !important;
+	}
+	.content {
+		width: 85% !important;
+	}
+	.output {
+		width: 95% !important;
+	}
+	.content2 {
+		width: 85% !important;
 	}
 }
 .button{

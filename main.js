@@ -35,14 +35,6 @@ var canvas, canDraw = false, drawBackground = false, downloadTimer;
 var downloadA;
 var outputDiv, downloadDiv, downloadButton;
 
-window.onload = () => {
-    downloadA = document.createElement('a');
-    outputDiv = document.getElementById('output-div');
-    downloadDiv = document.getElementById('download-div');
-    downloadButton = document.getElementById('download-button');
-    window.URL = window.webkitURL || window.URL;
-}
-
 function solve() {
     diameterSubconductor = getDiameterSubconductor(strands, diameterStrand);
     inductance = getInductance();
@@ -336,7 +328,7 @@ function setAnswerElements() {
             val = `${roundValue(val)} ${answer.unit}`;
         }
         answer.setFormatted(val);
-        console.log(answer);
+        // console.log(answer);
         document.getElementById(answer.id).value = val;
     }
 }
@@ -381,6 +373,14 @@ function getDownloadText() {
         str += `${i+1}) ${answers[i].detail} = ${answers[i].response}\n`;
     }
     return str;
+}
+
+window.onload = () => {
+    downloadA = document.createElement('a');
+    outputDiv = document.getElementById('output-div');
+    downloadDiv = document.getElementById('download-div');
+    downloadButton = document.getElementById('download-button');
+    window.URL = window.webkitURL || window.URL;
 }
 
 function createDownloadFile() {
@@ -493,11 +493,15 @@ var questions = [
     new Question('Power factor of recieving end load')
 ];
 
-const w = 500, h = 1000;
+var w = 500, h = 1000;
+var axisScaleTextWidth = 150, axisScaleTextHeight = 60;
+var titleTextHeight = 85;
+const titleTextSize = 17, normalTextSize = 14;
+const axisScaleTextFactor = 1.5;
 var ba;
 var b2r, b2s;
-const orx = w/2, ory = h/6, osx = w/2, osy = 2*h/3;
-const maxLengthR = 250, maxLengthS = 270;
+var orx, ory, osx, osy;
+var maxLengthR, maxLengthS;
 var scaleR, scaleS;
 var rr1, rr2, rr, rs1, rs2, rs;
 const ar = 10, tr = 20, lrx = 15, lry = 15;
@@ -512,6 +516,8 @@ const dirs = { LEFT: 0, RIGHT: 1, TOP: 2, BOTTOM: 3 };
 const actions = { INCREASE: 0, DECREASE: 1 };
 
 function setupDiagramValues() {
+    orx = w/2, ory = h/6 + axisScaleTextHeight + titleTextHeight, osx = w/2, osy = 2*h/3 + 2 * (axisScaleTextHeight + titleTextHeight);
+    maxLengthR = w/2, maxLengthS = w/2 * 1.05;
     rr1 = A.abs * vr * vr / B.abs;
     rr2 = vr * ir;
     rs1 = A.abs * vs * vs / B.abs;
@@ -535,20 +541,24 @@ function setupDiagramValues() {
 
 function setup() {
     let canvasContainer = document.getElementById('canvas-container');
-    canvas = createCanvas(w, h);
+    w = max(350, min(windowWidth, 500));
+    axisScaleTextWidth = Math.max(120, textWidth(getScaleXText(100)), textWidth(getScaleYText(100)));
+    canvas = createCanvas(w + getExtraWidth(), h + 2*(axisScaleTextHeight+titleTextHeight));
     canvas.parent('canvas-container'); 
 }
 
 function draw() {
     if (canDraw) {
         background(255, 255, 255);
+        drawTitle();
+        drawAxisScaleText();
         
         // Receiving End Diagram
         stroke(axisStroke);
         line(orx, ory - h/6 * axisLengthScaleY, orx, ory + h/4 * axisLengthScaleY);
         line(orx - w/2 * axisLengthScaleX, ory, orx + w/2 * axisLengthScaleX, ory);
         stroke(strokeColor);
-        textSize(14);
+        textSize(normalTextSize);
         drawLineText('Pᵣ', orx, ory, orx + w * axisLengthScaleX, ory, dirs.TOP, actions.DECREASE);
         drawLineText('Qᵣ', orx, ory, orx, ory - h/3 * axisLengthScaleY, dirs.RIGHT, actions.DECREASE);
 
@@ -599,7 +609,7 @@ function myArcText(x, y, a1, a2, st, dir1, dir2) {
     drawArcText(st, x, y, a1, a2, dir1, dir2);
 }
   
-  function drawArcText(st,x,y,a1,a2,dir1, dir2) {
+function drawArcText(st,x,y,a1,a2,dir1, dir2) {
     fill(textFill);
     stroke(textStroke);
     textAlign(invertDir(dir1), invertDir(dir2));
@@ -669,8 +679,50 @@ function drawLineText(st, x1, y1, x2, y2, dir, extSpaceAction, intSpaceAction) {
     
     stroke(strokeColor);
     noFill();
-  }
+}
 
+function windowResized() {
+    if (windowWidth > 750) return;
+    w = max(350, min(windowWidth, 500));
+    axisScaleTextWidth = Math.max(120, textWidth(getScaleXText(100)), textWidth(getScaleYText(100)));
+    canvas = createCanvas(w + getExtraWidth(), h + 2*(axisScaleTextHeight+titleTextHeight));
+    clear();
+    setupDiagramValues();
+}
+
+function drawTitle() {
+    fill(textFill);
+    stroke(textStroke);
+    textSize(titleTextSize);
+    textAlign(CENTER, CENTER);
+
+    text('Receiving End Circle Diagram', w/2, titleTextHeight/2);
+    text('Sending End Circle Diagram', w/2, h/2+3*titleTextHeight/2+axisScaleTextHeight);
+
+    textSize(normalTextSize);
+    stroke(strokeColor);
+    noFill();
+}
+
+function drawAxisScaleText() {
+    fill(textFill);
+    stroke(textStroke);
+    textAlign(LEFT, TOP);
+
+    text(`Scale:\n${getScaleXText(1/scaleR)}\n${getScaleYText(1/scaleR)}`, w - axisScaleTextWidth, titleTextHeight + axisScaleTextHeight/3);
+    text(`Scale:\n${getScaleXText(1/scaleS)}\n${getScaleYText(1/scaleS)}`, w - axisScaleTextWidth, h/2 + axisScaleTextHeight + titleTextHeight*2 + axisScaleTextHeight/3);
+
+    stroke(strokeColor);
+    noFill();
+}
+
+function getScaleXText(val) {
+    return `  x-axis: 1 unit = ${convertToEngMode(val, 'W')}`;
+}
+
+function getScaleYText(val) {
+    return `  y-axis: 1 unit = ${convertToEngMode(val, 'VA')}`;
+}
   
 function lineText(x1, y1, x2, y2, st, dir, extSpaceAction, intSpaceAction) {
     line(x1, y1, x2, y2);
@@ -703,6 +755,12 @@ function angle(x1, y1, x2, y2) {
     return t;
 }
 
+function getExtraWidth() {
+    if (w <= 800) return axisScaleTextWidth/3;
+    if (w <= 650) return 0;
+    return axisScaleTextWidth;
+}
+
 function invertDir(dir) {
     switch(dir) {
         case LEFT: return RIGHT;
@@ -711,7 +769,7 @@ function invertDir(dir) {
         case BOTTOM: return TOP;
     }
     return CENTER;
-  }
+}
 
 function roundValue(x) {
     return (x).toFixed(2).replace(/[.,]00$/, "");
