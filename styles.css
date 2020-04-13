@@ -16,6 +16,8 @@ header{
 	transition: 0.25s;
 }
 ul.nav{
+	font-family: monospace;
+	font-size: large;
 	position: relative;
 	margin: 0;
 	padding: 0;
