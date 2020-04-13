@@ -685,9 +685,11 @@ function windowResized() {
     if (windowWidth > 750) return;
     w = max(350, min(windowWidth, 500));
     axisScaleTextWidth = Math.max(120, textWidth(getScaleXText(100)), textWidth(getScaleYText(100)));
-    canvas = createCanvas(w + getExtraWidth(), h + 2*(axisScaleTextHeight+titleTextHeight));
+    resizeCanvas(w + getExtraWidth(), h + 2*(axisScaleTextHeight+titleTextHeight));
     clear();
-    setupDiagramValues();
+    if (canDraw) {
+        setupDiagramValues();
+    }
 }
 
 function drawTitle() {
