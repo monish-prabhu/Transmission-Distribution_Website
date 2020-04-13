@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>    
+    <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/mathquill/0.10.1/mathquill.min.css">`
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathquill/0.10.1/mathquill.min.js" type="text/javascript"></script>
+    
+    <title>Calculator</title>
+
+    <script>
+        var MQ = MathQuill.getInterface(2);
+    </script>
+</head>
+<body>
+    
+    <header>
+        
+        <h1 style="color:white;font-family: monospace;text-align: center;border-bottom:5px double rgb(238, 236, 236)">TRANSMISSION AND DISTRIBUTION SYSTEMS</h1>
+        <ul class="nav">
+        <li><a class="active" href="index.html">Home</a></li>
+        <li><a href="#">Formulas</a></li>
+        <li><a href="#">Team</a></li>
+        <li><a href="https://github.com/monishTechy/website">Source Files</a></li>
+        </ul>
+        
+    </header>
+    
+    
+    <div id="formulas-div" class = "formulas">
+        <div class = "formula-content">
+        <ol style="font-size: larger;font-weight: bold;" type="I">          
+            <li>
+                <span class="formula-span">MGMD = D_{eq}=\sqrt[3]{D_{ab}D_{bc}D_{ca}}</span>
+            </li>
+
+            <li>
+                <span class="formula-span">SGMD=\sqrt[N^2]{\left(D_{11}D_{12}..D_{1N}\right)\left(D_{21}D_{22}...D_{2N}\right)...\left(D_{N1}D_{N2}...D_{NN}\right)}</span>
+            </li>
+        </ol>
+    </div>
+
+    <script>
+        Array.from(document.getElementsByClassName('formula-span')).forEach(element => {
+            MQ.StaticMath(element);
+        });    
+    </script>
+            
+</body>
+</html>
