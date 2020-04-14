@@ -6,6 +6,7 @@ const LineModels = {
 const UNITS = ['m', 'mm', 'ft', 'inch'];
 const UNIT_MULTIPLIERS = [1, 0.001, 0.3048, 0.0254];
 const UNIT_PREFIX = {
+    '-12': 'p',
     '-9': 'n',
     '-6': 'ɥ',
     '-3': 'm',
@@ -92,8 +93,8 @@ function solve() {
     // console.log(`Recieving end: I = ${ir}, V = ${vr}, pf = ${pfr}, P = ${pr}; Sending end: V = ${vs}, I = ${is}, pf = ${pfs}, P = ${ps}`)
 
     answers = [
-        new Answer('inductance', inductance * 1000, 'Inductance per phase per km in H/km', 'H/km'),
-        new Answer('capacitance', capacitance * 1000, 'Capacitance per phase per km in F/km', 'F/km'),
+        new Answer('inductance', inductance, 'Inductance per phase per km in H/m', 'H/m'),
+        new Answer('capacitance', capacitance, 'Capacitance per phase per km in F/m', 'F/m'),
         new Answer('inductive-reactance', xl, 'Inductive reactance of the line in Ohm', 'Ω'),
         new Answer('capacitive-reactance', xc, 'Capacitive reactance of the line in Ohm', 'Ω'),
         new Answer('charging-current', chargingCurrent, 'Charging current drawn from the sending end substation', 'A'),
@@ -547,6 +548,7 @@ var axisScaleTextWidth = 150, axisScaleTextHeight = 60;
 var titleTextHeight = 85;
 const titleTextSize = 17, normalTextSize = 14;
 const axisScaleTextFactor = 1.5;
+var pointStrokeWeight = 5;
 var ba;
 var b2r, b2s;
 var orx, ory, osx, osy;
@@ -565,6 +567,8 @@ const dirs = { LEFT: 0, RIGHT: 1, TOP: 2, BOTTOM: 3 };
 const actions = { INCREASE: 0, DECREASE: 1 };
 var thetaRText = '', betaAlphaTextR = '', betaDeltaTextR = '', rrText = '', rr1Text = '', rr2Text = '';
 var thetaSText = '', betaAlphaTextS = '', betaDeltaTextS = '', rsText = '', rs1Text = '', rs2Text = '';
+var centerRText = '';
+var centerSText = '';
 
 function setupDiagramValues() {
     orx = w/2, ory = h/6 + axisScaleTextHeight + titleTextHeight, osx = w/2, osy = 2*h/3 + 2 * (axisScaleTextHeight + titleTextHeight);
@@ -598,6 +602,8 @@ function setupDiagramValues() {
         rr1Text = `|A||Vᵣ|²~|B|*= ${convertToEngMode(A.abs*vr*vr/B.abs, 'VA')}`;
         rrText =  `|Vᵣ||Vₛ|~|B| *= ${convertToEngMode(rr/scaleR, 'VA')}`;
 
+        centerRText = `(${roundValue(crx-orx)}, ${roundValue(cry-ory)})`;
+
         thetaSText = `θₛ = ${roundValue(degrees(thetaS))}°`;
         betaAlphaTextS = `β-α = ${roundValue(degrees(ba))}°`;
         betaDeltaTextS = `180°-(β+δ) = ${roundValue(degrees(b2s))}°`;
@@ -605,6 +611,8 @@ function setupDiagramValues() {
         rs2Text = `|Vₛ||Iₛ| = ${convertToEngMode(vs*is, 'VA')}`;
         rs1Text = `|A||Vₛ|²~|B|*= ${convertToEngMode(A.abs*vs*vs/B.abs, 'VA')}`;
         rsText = `|Vᵣ||Vₛ|~|B|*=${convertToEngMode(rs/scaleS, 'VA')}`;
+
+        centerSText = `(${roundValue(csx-osx)}, ${roundValue(csy-osy)})`;
 
     } else {
         thetaRText = `θᵣ`;
@@ -660,6 +668,12 @@ function draw() {
         dottedLine(crx, cry, crx + rr, cry);
         myArcText(crx, cry, 0, b2r, betaDeltaTextR, RIGHT);
 
+        drawText(centerRText, crx, cry, LEFT, BOTTOM);
+
+        strokeWeight(pointStrokeWeight);
+        point(crx, cry);
+        strokeWeight(1);
+
         // Sending End Diagram
         stroke(axisStroke);
         line(osx, osy - h/6 * axisLengthScaleY, osx, osy + h/4 * axisLengthScaleY);
@@ -688,6 +702,12 @@ function draw() {
         
         dottedLine(csx - rs/2, csy, csx + rs/2, csy);
         myArcText(csx, csy, 0, b2s, betaDeltaTextS, RIGHT);
+
+        drawText(centerSText, csx, csy, CENTER, BOTTOM);
+
+        strokeWeight(pointStrokeWeight);
+        point(csx, csy);
+        strokeWeight(1);
     }
 }
 
@@ -825,6 +845,17 @@ function lineText(x1, y1, x2, y2, st, dir, extSpaceAction, intSpaceAction) {
     drawLineText(st, x1, y1, x2, y2, dir, extSpaceAction, intSpaceAction);
 }
 
+function drawText(st, x, y, dir1, dir2) {
+    fill(textFill);
+    stroke(textStroke);
+    textAlign(invertDir(dir1), invertDir(dir2));
+
+    text(st, x, y);
+
+    stroke(strokeColor);
+    noFill();
+}
+
 function dottedLine(x1, y1, x2, y2) {
     let ang = angle(x1, y1, x2, y2);
     let d = distance(x1, y1, x2, y2);
@@ -881,4 +912,8 @@ function roundValueToThreeDecimals(x) {
 
 function roundValueToOneDecimal(x) {
     return (x).toFixed(1).replace(/[.,]000$/, "");
+}
+
+function sign(x) {
+    return (x < 0) ? '-' : '';
 }
