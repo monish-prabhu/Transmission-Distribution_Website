@@ -22,7 +22,7 @@ const MIME_TYPE = 'text/plain';
 const GITHUB_PAGE_URL = 'https://monishtechy.github.io/website/';
 const EPLISON = 8.8542 * Math.pow(10, -12);
 const PI = Math.PI, GMR_L = 0.7788;
-var symmetericalSpacing, distanceConductor, subconductorsPerConductor, distanceSubconductor, strands, diameterStrand, diameterSubconductor;
+var symmetericalSpacing, distanceConductorss, subconductorsPerConductor, distanceSubconductor, strands, diameterStrand, diameterSubconductor;
 var lineLength, lineLengthKm, lineModel, resistancePerKm, frequency;
 var inductance, capacitance, resistance, xc, xl;
 var vr, ir, pfr, pr, thetaR;
@@ -128,6 +128,14 @@ function sgmdL(n, distance, radius) {
     return sgmd(n, distance) * Math.pow(radius * GMR_L, 1/n);
 }
 
+function mgmd(distanceConductors) {
+    let ans = 1, conductors = distanceConductors.length;
+    for (let i = 0; i < conductors; ++i) {
+        ans *= Math.pow(distanceConductors[i], 1/conductors);
+    }
+    return ans;
+}
+
 function getDiameterSubconductor(strands, diameter) {
     let n = 1;
     while ((3*n*n - 3*n + 1) < strands) {
@@ -137,14 +145,14 @@ function getDiameterSubconductor(strands, diameter) {
 }
 
 function getInductance() {
-    let mg = distanceConductor;
+    let mg = mgmd(distanceConductors);
     let sg = sgmdL(subconductorsPerConductor, distanceSubconductor, diameterSubconductor/2);
     // console.log(`Inductance: SGMD = ${sg}, MGMD = ${mg}`);
     return 2 * Math.pow(10, -7) * Math.log10(mg / sg) / Math.LOG10E;
 }
 
 function getCapacitance() {
-    let mg = distanceConductor;
+    let mg = mgmd(distanceConductors);
     let sg = sgmdC(subconductorsPerConductor, distanceSubconductor, diameterSubconductor/2);
     // console.log(`Capacitance: SGMD = ${sg}, MGMD = ${mg}`);
     return 2 * PI * EPLISON / Math.log10(mg / sg) * Math.LOG10E;
@@ -243,42 +251,63 @@ function setQuestionValues() {
             let select = document.getElementById(`select-value-${i+1}`);
             questions[i].setResponseOption(select.selectedIndex);        
         } else {
-            let inputText = document.getElementById(`input-value-${i+1}`).value;
-            if (inputText == '') {
-                alert(`No input provided for ${questions[i].getQuestion()}`);
-                flag = false;
-                break;
+            let inputTexts = [], vals = [];
+            if (i == 1) {
+                if (questions[0].getResponseOption() == 1) {
+                    inputTexts = [
+                        document.getElementById('Dab').value,
+                        document.getElementById('Dbc').value,
+                        document.getElementById('Dca').value
+                    ];
+                } else {
+                    inputTexts = [document.getElementById('Deq').value];
+                }
+            } else {
+                inputTexts = [document.getElementById(`input-value-${i+1}`).value];
             }
-            let val = Number(parseInput(inputText));
-            if (!val) {
-                alert(`Invalid input for ${questions[i].getQuestion()}`);
-                flag = false;
-                break;
+            for (let j = 0; j < inputTexts.length; ++j) {
+                let inputText = inputTexts[j];
+                if (inputText == '') {
+                    alert(`No input provided for ${questions[i].getQuestion()}`);
+                    flag = false;
+                    break;
+                }
+                let val = Number(parseInput(inputText));
+                if (!val) {
+                    alert(`Invalid input for ${questions[i].getQuestion()}`);
+                    flag = false;
+                    break;
+                }
+                let unitElement = document.getElementById(`select-units-${i+1}`);
+                if (unitElement && unitElement.options.length > 1) {             
+                    val = convertToSiUnits(val, unitElement.selectedIndex);
+                }
+                if (val <= 0 && i != questions.length-1) {
+                    alert(`Invalid non-positive input for ${questions[i].getQuestion()}`);
+                    flag = false;
+                    break;
+                }  
+                if (questions[i].isInteger() && !Number.isInteger(val)) {
+                    alert(`Invalid non-integer input for ${questions[i].getQuestion()}`);
+                    flag = false;
+                    break;
+                }
+                val *= Math.pow(10, questions[i].getDefaultPrefix());
+                vals.push(val);
             }
-            let unitElement = document.getElementById(`select-units-${i+1}`);
-            if (unitElement && unitElement.options.length > 1) {             
-                val = convertToSiUnits(val, unitElement.selectedIndex);
+            if (flag) {
+                if (vals.length == 1 && i != 1) questions[i].setResponse(vals[0]);
+                else questions[i].setResponse(vals);
             }
-            if (val <= 0 && i != questions.length-1) {
-                alert(`Invalid non-positive input for ${questions[i].getQuestion()}`);
-                flag = false;
-                break;
-            }  
-            if (questions[i].isInteger() && !Number.isInteger(val)) {
-                alert(`Invalid non-integer input for ${questions[i].getQuestion()}`);
-                flag = false;
-                break;
-            }
-            val *= Math.pow(10, questions[i].getDefaultPrefix());
-            questions[i].setResponse(val);
         } 
-    }
+    }   
     return flag;
 }
 
 function setVariableValues() {
     symmetericalSpacing = (questions[0].getResponseOption() == 0);
-    distanceConductor = questions[1].getResponse();
+    distanceConductors = questions[1].getResponse();
+    console.log(distanceConductors);
     subconductorsPerConductor = questions[2].getResponse();
     distanceSubconductor = questions[3].getResponse();
     strands = questions[4].getResponse();
@@ -335,11 +364,19 @@ function setAnswerElements() {
 
 function convertAllToEngMode() {
     for (let i = 0; i < questions.length; ++i) {
-        if (questions[i].hasUnit()) {
-            questions[i].setResponseFormatted(convertToEngMode(questions[i].getResponse(), questions[i].getUnit(), questions[i].getDefaultPrefix()));
-        } else {
-            questions[i].setResponseFormatted(questions[i].getResponse());
+        if (i != 1) {
+            if (questions[i].hasUnit()) {
+                questions[i].setResponseFormatted(convertToEngMode(questions[i].getResponse(), questions[i].getUnit(), questions[i].getDefaultPrefix()));
+            } else {
+                questions[i].setResponseFormatted(questions[i].getResponse());
+            }
         }
+    }
+    let distances = questions[1].getResponse();
+    if (symmetericalSpacing){
+        questions[1].setResponseFormatted(`Dab = Dbc = Dca = ${convertToEngMode(distances[0], 'm')}`);
+    } else {
+        questions[1].setResponseFormatted(`Dab = ${convertToEngMode(distances[0], 'm')}, Dbc = ${convertToEngMode(distances[1], 'm')}, Dca = ${convertToEngMode(distances[2], 'm')}`);
     }
     // console.log(questions);
 }
@@ -376,6 +413,7 @@ function getDownloadText() {
 }
 
 window.onload = () => {
+    SorUs(document.getElementById('select-value-1'));
     downloadA = document.createElement('a');
     outputDiv = document.getElementById('output-div');
     downloadDiv = document.getElementById('download-div');
@@ -422,16 +460,17 @@ function parseInput(x) {
 }
 
 class Question {
-    constructor(question, unit, defaultPrefix, isInteger, responseOptions, response) {
+    constructor(question, unit, defaultPrefix, isInteger, responseOptions, response, numberOfResponses) {
         this._question = question;
         this._unit = unit;
         this._defaultPrefix = defaultPrefix;
         this._response = response;
         this._options = responseOptions;
-        this._isInteger = isInteger == true ? true : false; 
+        this._isInteger = (isInteger == true ? true : false); 
         if (!response && responseOptions && responseOptions.length > 0) {
             this._response = responseOptions[0];
         }
+        this._numberOfResponses = (numberOfResponses ? numberOfResponses : 1);
         
     }
     setResponse(response) {
@@ -444,6 +483,9 @@ class Question {
     }
     setResponseFormatted(responseFormatted) {
         this._responseFormatted = responseFormatted;
+    }
+    setNumberOfResponses(numberOfResponses) {
+        this._numberOfResponses = numberOfResponses;
     }
     getQuestion() {
         return this._question;
@@ -471,6 +513,9 @@ class Question {
     }
     getDefaultPrefix() {
         return this._defaultPrefix ? this._defaultPrefix : 0;
+    }
+    getNumberOfResponses() {
+        return this._numberOfResponses;
     }
     isInteger(){
         return this._isInteger;
