@@ -602,7 +602,7 @@ function setupDiagramValues() {
         rr1Text = `|A||Vᵣ|²~|B|*= ${convertToEngMode(A.abs*vr*vr/B.abs, 'VA')}`;
         rrText =  `|Vᵣ||Vₛ|~|B| *= ${convertToEngMode(rr/scaleR, 'VA')}`;
 
-        centerRText = `(${roundValue(crx-orx)}, ${roundValue(cry-ory)})`;
+        centerRText = `(${roundValue(crx-orx)}, ${roundValue(-cry+ory)})`;
 
         thetaSText = `θₛ = ${roundValue(degrees(thetaS))}°`;
         betaAlphaTextS = `β-α = ${roundValue(degrees(ba))}°`;
@@ -612,7 +612,7 @@ function setupDiagramValues() {
         rs1Text = `|A||Vₛ|²~|B|*= ${convertToEngMode(A.abs*vs*vs/B.abs, 'VA')}`;
         rsText = `|Vᵣ||Vₛ|~|B|*=${convertToEngMode(rs/scaleS, 'VA')}`;
 
-        centerSText = `(${roundValue(csx-osx)}, ${roundValue(csy-osy)})`;
+        centerSText = `(${roundValue(csx-osx)}, ${roundValue(-csy+osy)})`;
 
     } else {
         thetaRText = `θᵣ`;
