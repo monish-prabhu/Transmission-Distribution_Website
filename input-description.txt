@@ -1,0 +1,51 @@
+1. Type Of System:
+Description: Type of spacing between the phase conductors.
+Options: Symmetrical spacing, Unsymmetrical spacing
+
+2. Spacing between the conductors:
+Description: Spacing between the phase conductors
+Units: m, mm, inch or ft
+Range: All positive distances
+
+3. Number of sub-conductors per bundle:
+Description: Number of sub-conductors in each phase conductor (Assumed to be equal for all
+the three phases).
+Range: Positive number of subconductors
+
+4. Diameter of each strand:
+Description: Diameter of the stranded ACSR conductor (Assumed to equal for all subconductors).
+Units: m, mm, inch or ft
+Range: All positive distances
+
+5. Length of the line:
+Description: Line length is the distance between sending and receiving end.
+Unit: km
+Range: All positive distances
+
+6. Model of the line:
+Description: Model of line based on length and and type of connection.
+Options: Short, Nominal Pi and Long
+
+7. Resistance of the line:
+Description: Resistance of the the transmission line.
+Unit: ohm/km
+Range: All positive values
+
+8. Power frequency:
+Description: Frequency of the power system.
+Unit: Hz
+Range: All positive values
+
+9. Nominal System voltage:
+Description: Rated operating voltage of the receiving end.
+Unit: volts
+Range: All positive values
+
+10. Receiving end load:
+Description: Real power consumed by the load connected in receiving end.
+Unit: MW
+Valid Range: All positive values
+
+11. Power factor of receiving end load:
+Description: Power factor of the load in receiving end (Assumed to be lagging load).
+Range: Values ranging from 0 to 1
