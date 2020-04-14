@@ -292,6 +292,11 @@ function setQuestionValues() {
                     flag = false;
                     break;
                 }
+                if (i == questions.length - 1 && (val < 0 || val > 1)) {
+                    alert(`Invalid ${questions[i].getQuestion()}. Range is 0 to 1`);
+                    flag = false;
+                    break;
+                }
                 val *= Math.pow(10, questions[i].getDefaultPrefix());
                 vals.push(val);
             }
