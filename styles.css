@@ -76,6 +76,21 @@ ul.nav li a:hover{
 	.content2 {
 		width: 85% !important;
 	}
+	.formulas {
+		width: 90% !important;
+	}
+	.formula-content {
+		width: 80% !important;
+	}
+}
+
+@media(max-width: 750px) {
+	.formulas {
+		width: 95% !important;
+	}
+	.formula-content {
+		width: 90% !important;
+	}
 }
 .button{
     font-size: 25;
@@ -245,7 +260,7 @@ input.ip{
 
 .formulas {
 	background-color: rgba(5, 3, 3, 0.295);
-    width: 90%;
+    width: 85%;
 	font-family:monospace;
 	color: #fff;
     border:5px double ;
@@ -255,4 +270,13 @@ input.ip{
 .formula-content{
 	width: 70%;
 	margin: auto;
+}
+
+.formula-p {
+	font-size: 17px;
+	margin-top: 10px;
+}
+
+.formula-span {
+	margin-top: 10px;
 }

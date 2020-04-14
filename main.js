@@ -22,7 +22,7 @@ const MIME_TYPE = 'text/plain';
 const GITHUB_PAGE_URL = 'https://monishtechy.github.io/website/';
 const EPLISON = 8.8542 * Math.pow(10, -12);
 const PI = Math.PI, GMR_L = 0.7788;
-var symmetericalSpacing, distanceConductorss, subconductorsPerConductor, distanceSubconductor, strands, diameterStrand, diameterSubconductor;
+var symmetericalSpacing, distanceConductors, subconductorsPerConductor, distanceSubconductor, strands, diameterStrand, diameterSubconductor;
 var lineLength, lineLengthKm, lineModel, resistancePerKm, frequency;
 var inductance, capacitance, resistance, xc, xl;
 var vr, ir, pfr, pr, thetaR;
@@ -307,7 +307,6 @@ function setQuestionValues() {
 function setVariableValues() {
     symmetericalSpacing = (questions[0].getResponseOption() == 0);
     distanceConductors = questions[1].getResponse();
-    console.log(distanceConductors);
     subconductorsPerConductor = questions[2].getResponse();
     distanceSubconductor = questions[3].getResponse();
     strands = questions[4].getResponse();
